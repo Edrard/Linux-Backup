@@ -1,0 +1,97 @@
+{
+    "backup": {
+    "1": {
+        "src": "\/usr\/local\/backup",
+        "dstfolder": "\/site\/base",
+        "local": "base\/",
+        "type": "now",
+        "days": "0",
+        "mounths": "0",
+        "filename": "base",
+        "fileinc": "d-m-Y",
+        "typebackup": "file",
+        "exclude": "",
+        "mysqlbase": "",
+        "mysqlconfig": "",
+        "dst": "1"
+    },
+    "2": {
+        "src": "\/var\/www\/vhosts\/test2.wot-news.com\/http\/soft\/linux_backup\/",
+        "dstfolder": "\/site\/otrs",
+        "local": "base\/otrs",
+        "type": "increment",
+        "days": "1",
+        "months": "1",
+        "filename": "otrs",
+        "fileinc": "d-m-Y",
+        "typebackup": "file",
+        "exclude": "",
+        "mysqlbase": "",
+        "mysqlconfig": "",
+        "dst": "1"
+    },
+    "3": {
+        "src": "\/opt\/selenium\/",
+        "dstfolder": "\/site\/selenium",
+        "local": "base\/selenium\/",
+        "type": "time",
+        "days": "5",
+        "months": "0",
+        "filename": "sites",
+        "fileinc": "d-m-Y",
+        "typebackup": "file",
+        "exclude": "",
+        "mysqlbase": "",
+        "mysqlconfig": "",
+        "dst": "1"
+    },
+    "4": {
+        "src": "",
+        "dstfolder": "\/site\/vamark",
+        "local": "base\/mysql\/",
+        "type": "time",
+        "days": "5",
+        "months": "0",
+        "filename": "mysql",
+        "fileinc": "d-m-Y",
+        "typebackup": "mysql",
+        "exclude": "",
+        "mysqlbase": "amorq",
+        "mysqlconfig": "1",
+        "dst": "1"
+    }
+    },
+    "config": {
+        "1": {
+            "host": "mx.com",
+            "user": "test",
+            "pass": "1111",
+            "type": "ftp"
+        }     
+    },
+    "mysql": {
+        "1": {
+            "host": "localhost",
+            "user": "root",
+            "pass": "1111"
+        }
+    },
+    "log": {
+        "file": {
+            "dst":"nlog",
+            "full":"1"
+        },
+        "mail": {
+            "user": "",
+            "pass": "",
+            "smtp": "",
+            "port": "25",
+            "from": "",
+            "to": "" ,
+            "full": "1"  
+        }
+    }
+}
+
+
+

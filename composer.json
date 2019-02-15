@@ -1,0 +1,38 @@
+{
+    "name": "edrard/backup",
+    "description": "Linux folder backup",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["backup","linux"],
+    "homepage": "https://github.com/Edrard/linux_backup",
+    "authors": [{
+        "name": "Edrard",
+        "email": "demonand@gmail.com"
+    }],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/function.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/MyLog.git"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "edrard/function": "dev-master",
+        "edrard/MyLog": "dev-master",
+        "league/flysystem": "^1.0",
+        "nesbot/carbon": "^1.32",
+        "emgag/flysystem-hash": "^1.0",
+        "ifsnop/mysqldump-php": "^2.6"
+    },
+    "autoload": {
+        "psr-4": {
+        "backup\\": "src/backup",
+        "Flysystem\\": "src/Flysystem",
+        "Exc\\": "src/Exc"
+        }
+    }
+}
