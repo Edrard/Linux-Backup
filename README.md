@@ -6,10 +6,10 @@ Version 2.0.1
 
 To install this package you need **git** and **composer**
 
-“`
+```
 git clone https://github.com/Edrard/linux_backup.git
 composer install 
-“`
+```
 
 ## Use
 
@@ -17,7 +17,7 @@ After installation, configuration it. Main con fig file is — ftp.json
 
 Example Config
 
-“`
+```json
 {
  "backup": {
  "1": {
@@ -83,7 +83,7 @@ Example Config
  }
  }
 }
-“` 
+``` 
 
 **src** — source where take files
 
@@ -149,6 +149,6 @@ If you wish to receive mail notification with logs, then go to mail section.
 
 **host name** — used for subject
  
-“`
+```
 After all add next cron job from file backup_cron to you /etc/cron.d/
-“`
+```
