@@ -11,7 +11,6 @@ use Exc\NoDistinationException;
 use Exc\NoInicializationException;
 use Emgag\Flysystem\Hash\HashPlugin;
 use edrard\Log\MyLog;
-use \backup\LogConfig;
 
 Class Backup 
 {   
@@ -21,9 +20,6 @@ Class Backup
     protected $dst = array();
     function __construct(Config $config){
         $this->config =  $config; 
-        LogConfig::init($this->config->returnLog());
-        MyLog::init('logs','main');
-        MyLog::changeType(array('warning','error','critical'),'main');
     } 
     protected function initial(){
         $adapter = new Local('/');

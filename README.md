@@ -1,6 +1,6 @@
 # Linux Backup
  
-Version 2.0.0
+Version 2.0.1
 
 ## Install
 
@@ -65,6 +65,22 @@ Example Config
             "user": "root",
             "pass": "123456"
         }
+    },
+    "log": {
+        "file": {
+            "dst":"nlog",
+            "full":"1"
+        },
+        "mail": {
+            "user": "",
+            "pass": "",
+            "smtp": "",
+            "port": "25",
+            "from": "",
+            "to": "",
+            "separate":"1",
+            "hostname":"My Server" 
+        }
     }
 }
 ```    
@@ -107,6 +123,24 @@ Right now possible only FTP
 
 **Mysql**
 just normal mysql credentials
+   
+**Log**
+
+Log configuration section. In file we have two parameters
+
+**dst** - destination folder for logs
+**full** - if 1, then we log everything, if any anothere or empty value, then onle error,warning,crtitcal.
+
+If you wish to recivie mail notification with logs, then go to mail section
+
+**user** - login for email
+**pass** - password from email
+**smtp** - SMTP server
+**port** - SMTP port server
+**from** - email from who we sending
+**to** - recipient email, separated by comma
+**separate** - if 1, then separate mails by type and send multiple emails, if any another or empty value then one merged maill will send
+**hostname** - used for subject
         
 ```
 After all add next cron job from file backup_cron to you /etc/cron.d/

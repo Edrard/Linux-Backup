@@ -1,16 +1,21 @@
 <?php
 namespace backup;
 
+use edrard\Log\MyLog;
+
 Class Config 
 {
     protected $config = array();
+    protected $mailer = FALSE;
 
     function __construct($file){
-        $this->config =  json_decode(file_get_contents($file),TRUE);
+        $this->config =  json_decode(file_get_contents($file),TRUE);         
         $this->fixBaseDirectory();
         $this->exclude();
         $this->filename();
         $this->mysql();
+        $this->initLog();
+
     }
     function get($name){
         return isset($this->config[$name]) ? $this->config[$name] : FALSE;    
@@ -59,5 +64,69 @@ Class Config
     }
     function returnLog(){
         return $this->config['log'];
+    }
+    protected function initLog(){
+        $this->fileLogSet();
+        $this->mailLogSet();
+    }
+    protected function fileLogSet(){  
+        MyLog::init($this->config['log']['file']['dst'],'main');
+        if($this->config['log']['file']['full'] != 1){
+            MyLog::changeType(array('warning','error','critical'),'main');  
+        } 
+    }
+    protected function mailLogSet(){
+
+        $mail = $this->config['log']['mail'];
+        if($mail['user'] && $mail['pass'] && $mail['smtp']){
+            $transport = (new \Swift_SmtpTransport($mail['smtp'], $mail['port']))
+            ->setUsername($mail['user'])
+            ->setPassword($mail['pass'])
+            ;
+            $this->mailer = new \Swift_Mailer($transport);
+
+            register_shutdown_function(array($this, 'mailSend'));
+        }
+
+    }
+    public function mailSend(){
+        if($this->mailer !== FALSE){
+            $config = MyLog::getLogConfig('main');  
+            $log_files = glob($config['path'].'/'.'*'.$config['date'].'*');
+            $read = '';
+            foreach($log_files as $log){
+                $type = $this->getLogType($log,$config);
+                $read .= $type."\n\n".file_get_contents($log);
+                if($this->config['log']['mail']['separate'] == 1){
+                    $this->sendMailLog($read,'['.$type.' '.$this->config['log']['mail']['hostname'].']');
+                    $read = '';
+                }        
+            }
+            if($this->config['log']['mail']['separate'] != 1){
+                $this->sendMailLog($read,'['.$this->config['log']['mail']['hostname'].']');
+            }  
+        }   
+    }
+    protected function getLogType($log,$config){
+        $log =  pathinfo($log);
+        $filename = $log['filename'];
+        $return = '';
+        foreach($config['types'] as $type => $file){
+            $logname = pathinfo($file);
+            $logname = $logname['filename'];    
+            if(strpos($filename,$logname) !== FALSE){
+                $return .= ' '.$type;
+            }
+        }
+        return $return ? trim($return) : 'unknown';
+    }
+    protected function sendMailLog($text,$subject){
+        $to = explode(',',$this->config['log']['mail']['to']);
+        $message = (new \Swift_Message($subject))
+        ->setFrom([$this->config['log']['mail']['from'] => $this->config['log']['mail']['hostname']])
+        ->setTo($to)
+        ->setBody($text)
+        ;
+        $result = $this->mailer->send($message);  
     }
 }

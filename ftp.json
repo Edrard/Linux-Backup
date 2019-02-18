@@ -87,8 +87,9 @@
             "smtp": "",
             "port": "25",
             "from": "",
-            "to": "" ,
-            "full": "1"  
+            "to": "",
+            "separate":"1",
+            "hostname":"My Server" 
         }
     }
 }
