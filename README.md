@@ -7,7 +7,7 @@ Version 2.0.1
 To install this package you need **git** and **composer**
 
 ```
-git clone https://github.com/Edrard/linux_backup.git
+git clone https://github.com/Edrard/Linux-Backup.git
 composer install 
 ```
 
