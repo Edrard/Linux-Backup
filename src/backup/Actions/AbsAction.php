@@ -66,6 +66,9 @@ Abstract Class AbsAction
         if(date('j') != 1 || FULL_INCREMENT != 1){
             $time = Carbon::today()->subDay()->subSecond()->timestamp;   
             $type = 'd'; 
+            MyLog::info('Daily Increment Backup start',$this->config,'main');
+        }else{
+            MyLog::info('Monthly Full Backup start',$this->config,'main');
         } 
         $this->archiveFiles($src,$local,$filename.'-'.$type,$time);
         return $type;

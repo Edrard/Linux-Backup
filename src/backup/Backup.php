@@ -22,7 +22,7 @@ Class Backup
         $this->config =  $config; 
     } 
     protected function initial(){
-        $adapter = new Local('/');
+        $adapter = new Local('/', LOCK_SH, Local::SKIP_LINKS);
         $local = new Filesystem($adapter);
         foreach($this->config->returnActions() as $key => $elem){ 
             $ctype = (strtolower($elem['typebackup']) != 'mysql' ? ucfirst(strtolower($elem['type'])) : 'Time').ucfirst(strtolower($elem['typebackup']));
