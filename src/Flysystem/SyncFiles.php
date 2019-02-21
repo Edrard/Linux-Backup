@@ -35,10 +35,10 @@ class SyncFiles implements PluginInterface
         $this->local = $src;
         $this->src_path = $src_path;
         $this->dst_path = $path === NULL ? '' : $path;
-        $this->exclude = $exclude;
+        $this->exclude = $exclude;    
         try{
-            $this->contents = GenerateMd5::generate($this->local,$src_path, $recursive); 
-            $this->dst = GenerateMd5::generate($this->filesystem,$path, $recursive);
+            $this->contents = $this->local->listContents($this->src_path, $recursive);
+            $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
             foreach($this->contents as $key => $way){
                 $this->contents[$key]['path'] = $way['path'] = str_replace(trim($this->src_path,'/'),'',$way['path']);
 
@@ -65,7 +65,8 @@ class SyncFiles implements PluginInterface
             if($way['type'] == $d['type'] && $way['path'] == $d['path']){
                 if($way['type'] == 'dir'){
                     return;
-                }elseif(isset($way['md5']) && isset($d['md5']) && $way['md5'] == $d['md5']){
+                }elseif(isset($out['size']) && isset($d['size']) && $out['size'] == $d['size']
+                && isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
                     return;
                 }
             }        
@@ -78,7 +79,8 @@ class SyncFiles implements PluginInterface
             if($out['type'] == $d['type'] && $out['path'] == $d['path']){
                 if($out['type'] == 'dir'){
                     return;
-                }elseif(isset($out['md5']) && isset($d['md5']) && $out['md5'] == $d['md5']){
+                }elseif(isset($out['size']) && isset($d['size']) && $out['size'] == $d['size']
+                && isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
                     return;
                 }
             }        
