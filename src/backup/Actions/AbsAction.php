@@ -54,6 +54,7 @@ Abstract Class AbsAction
         MyLog::info('Backup time execution for '.$this->class.' is '.$this->execution_time,$this->config,'main');
     }
     protected function rsync($src,$dstfolder,$exclude = array()){
+        MyLog::info('Sync started for config',$this->config,'main');
         $exclude = empty($exclude) ? $this->config['exclude'] : $exclude;
         $this->dst->syncFiles($this->local,$src,$dstfolder,$exclude); 
     }  
@@ -64,7 +65,7 @@ Abstract Class AbsAction
         $time = 0;
         $type = 'm';
         if(date('j') != 1 || FULL_INCREMENT != 1){
-            $time = Carbon::today()->subDay()->subSecond()->timestamp;   
+            $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;   
             $type = 'd'; 
             MyLog::info('Daily Increment Backup start',$this->config,'main');
         }else{
