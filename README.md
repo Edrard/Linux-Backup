@@ -10,9 +10,11 @@ To install this package you need **git** and **composer**
 git clone https://github.com/Edrard/Linux-Backup.git
 composer install 
 ```
-
+    
 ## Use
 
+All ftp php function and exec() function must be removed from disabled function
+exec() used to run linux zip app(having problems with ZipArchive class, becouse of temporary files)
 After installation, configuration it. Main con fig file is — ftp.json
 
 Example Config
