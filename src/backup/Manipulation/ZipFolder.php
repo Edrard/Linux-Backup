@@ -6,7 +6,6 @@ use League\Flysystem\Filesystem;
 use edrard\Log\MyLog;
 use Exc\Base;
 use Carbon\Carbon;
-use \ZipArchive;
 
 class ZipFolder
 {
@@ -15,21 +14,20 @@ class ZipFolder
     protected static $where;
     protected static $increment;
     protected static $name;
-    protected static $zipper;
+    protected static $zipper; 
 
     public static function zip(Filesystem $file, $src_path, $where = null, $increment = 0, $name, $recursive = TRUE)
     {
 
         static::$src_path = trim($src_path,'/');
         static::$where = $where === NULL ? '' : trim($where,'/');
-        static::$increment = $increment;
+        static::$increment = $increment;  
         static::$name = $name;
         static::$filesystem = $file;
-        static::$zipper =  new ZipArchive();
+        static::$zipper = '/'.static::$where.'/'.static::$name.'.zip'; 
         //dd('/'.static::$where.'/'.static::$name.'.zip');
-        static::$zipper->open('/'.static::$where.'/'.static::$name.'.zip', ZIPARCHIVE::CREATE);
-        //dd( static::$src_path, static::$where,static::$increment,static::$name,static::$filesystem);
         try{
+            //dd( static::$src_path, static::$where,static::$increment,static::$name,static::$filesystem);
             if(!$name){ 
                 throw new Base('No name setted','error');
             }
@@ -44,11 +42,15 @@ class ZipFolder
         foreach($contents as $con){ 
             if(($con['timestamp'] > static::$increment || static::$increment == 0) && $con['type'] != 'dir'){
                 $relativePath = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
-                static::$zipper->addFile('/'.$con['path'], $relativePath);
+                $cd = str_replace($relativePath,'','/'.$con['path']);
+                if(file_exists(static::$zipper)){
+                    exec('cd '.$cd.' && zip -u '.static::$zipper.' "'.$relativePath.'"' );
+                }else{ 
+                    exec('cd '.$cd.' && zip -9 '.static::$zipper.' "'.$relativePath.'"' );
+                }
                 MyLog::info("Added file to archive ".static::$name.'.zip',array('/'.$con['path']),'main');
             }
         }
-        static::$zipper->close();
-         MyLog::info("Files zipped",array(),'main'); 
+        MyLog::info("Files zipped",array(),'main'); 
     }
 }

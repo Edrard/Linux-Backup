@@ -6,7 +6,6 @@ use League\Flysystem\Filesystem;
 use edrard\Log\MyLog;
 use Exc\Base;
 use Carbon\Carbon;
-use \ZipArchive;
 
 class ZipFiles
 {
@@ -20,8 +19,7 @@ class ZipFiles
         static::$name = $name; 
         static::$where = trim($where,'/');
         static::$path = $path;
-        static::$zipper =  new ZipArchive();
-        static::$zipper->open('/'.static::$where.'/'.static::$name.'.zip', ZIPARCHIVE::CREATE);
+        static::$zipper = '/'.static::$where.'/'.static::$name.'.zip';
         //dd( static::$src_path, static::$where,static::$increment,static::$name,static::$filesystem);
         try{
             if(!$name){ 
@@ -35,10 +33,15 @@ class ZipFiles
     }
     protected static function addFiles(){
         foreach(static::$path as $path){ 
-            static::$zipper->addFile($path,pathinfo($path)['basename']);
+            $relativePath = pathinfo($path)['basename'];
+            $cd = str_replace($relativePath,'',$path);
+            if(file_exists(static::$zipper)){
+                exec('cd '.$cd.' && zip -u '.static::$zipper.' "'.$relativePath.'"' );
+            }else{ 
+                exec('cd '.$cd.' && zip -9 '.static::$zipper.' "'.$relativePath.'"' );
+            }
             MyLog::info("Added file to archive ".static::$name.'.zip',array($path),'main');
         }
-        static::$zipper->close();
         MyLog::info("Files zipped",array(),'main');    
     }
 }
