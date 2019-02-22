@@ -41,7 +41,7 @@ class SyncFiles implements PluginInterface
             $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
             MyLog::info("[Sync] Check if exist",array(),'main');
             foreach($this->contents as $key => $way){
-                $this->contents[$key]['path'] = $way['path'] = preg_replace('#^'.trim($this->src_path,'#').'/iU', '', $way['path']);
+                $this->contents[$key]['path'] = $way['path'] = preg_replace('#^'.trim($this->src_path,'/').'#iU', '', $way['path']);
 
                 //Check if exist 
                 $this->checkIfExist($way);            
