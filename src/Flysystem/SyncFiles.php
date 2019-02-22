@@ -39,20 +39,26 @@ class SyncFiles implements PluginInterface
         try{
             $this->contents = $this->local->listContents($this->src_path, $recursive);
             $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
+            MyLog::info("[Sync] Check if exist",array(),'main');
             foreach($this->contents as $key => $way){
                 $this->contents[$key]['path'] = $way['path'] = str_replace(trim($this->src_path,'/'),'',$way['path']);
 
                 //Check if exist 
                 $this->checkIfExist($way);            
             }
+            MyLog::info("[Sync] Check if delete",array(),'main');
             foreach($this->dst as $key => $out){
                 //Check if delete 
                 $this->checkIfDelete($out);            
             }
+            MyLog::info("[Sync] Files deleting process starting",array(),'main');
             $this->deleteFiles();
+            MyLog::info("[Sync] Directory deleting process starting",array(),'main');
             $this->deleteDirectory();
+            MyLog::info("[Sync] Directory creating process starting",array(),'main');
             $this->createDirectory();
-            $this->CopyUpdateFiles();
+            MyLog::info("[Sync] Files copy process starting",array(),'main');
+            $this->CopyUpdateFiles();                            
         }Catch(\Exception $e){
             MyLog::error('[SyncFiles] '.$e->getMessage()); 
             die($e->getMessage());   
