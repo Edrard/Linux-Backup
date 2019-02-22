@@ -15,6 +15,7 @@ class ZipFolder
     protected static $increment;
     protected static $name;
     protected static $zipper; 
+    protected static $zip_in = 100;
 
     public static function zip(Filesystem $file, $src_path, $where = null, $increment = 0, $name, $recursive = TRUE)
     {
@@ -39,18 +40,35 @@ class ZipFolder
     }
     protected static function zipRun(){
         $contents = static::$filesystem->listContents(static::$src_path,true);
+        $i = 0;
+        $list = array();
         foreach($contents as $con){ 
             if(($con['timestamp'] > static::$increment || static::$increment == 0) && $con['type'] != 'dir'){
-                $relativePath = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
-                $cd = str_replace($relativePath,'','/'.$con['path']);
-                if(file_exists(static::$zipper)){
-                    exec('cd '.$cd.' && zip -u '.static::$zipper.' "'.$relativePath.'"' );
-                }else{ 
-                    exec('cd '.$cd.' && zip -9 '.static::$zipper.' "'.$relativePath.'"' );
+                $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
+                $cd = str_replace($relative_path,'','/'.$con['path']);
+                $list[] = $relative_path;
+                $i++;
+                if($i >= static::$zip_in){
+                    static::zipList($cd,$list);
+                    $list = array();
+                    $i = 0;    
                 }
                 MyLog::info("Added file to archive ".static::$name.'.zip',array('/'.$con['path']),'main');
-            }
+            }   
         }
+        static::zipList($cd,$list); 
         MyLog::info("Files zipped",array(),'main'); 
+    }
+    protected static function zipList($cd,$list){
+        if(empty($list)){
+            return;
+        }        
+        MyLog::info("Adding to zip files",array(),'main');
+        $list = implode('" "',$list); 
+        if(file_exists(static::$zipper)){
+            exec('cd '.$cd.' && zip -u '.static::$zipper.' "'.$list.'"' );
+        }else{ 
+            exec('cd '.$cd.' && zip -9 '.static::$zipper.' "'.$list.'"' );
+        }    
     }
 }
