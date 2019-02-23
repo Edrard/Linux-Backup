@@ -71,9 +71,14 @@ class SyncFiles implements PluginInterface
             if($way['type'] == $d['type'] && $way['path'] == $d['path']){
                 if($way['type'] == 'dir'){
                     return;
-                }elseif(isset($out['size']) && isset($d['size']) && $out['size'] == $d['size']
-                && isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
-                    return;
+                }elseif(isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
+                    if(isset($out['size']) && isset($d['size'])){
+                        if($out['size'] == $d['size']){
+                            return;  
+                        }
+                    }else{
+                        return;
+                    }
                 }
             }        
         }
@@ -85,9 +90,14 @@ class SyncFiles implements PluginInterface
             if($out['type'] == $d['type'] && $out['path'] == $d['path']){
                 if($out['type'] == 'dir'){
                     return;
-                }elseif(isset($out['size']) && isset($d['size']) && $out['size'] == $d['size']
-                && isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
-                    return;
+                }elseif(isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
+                    if(isset($out['size']) && isset($d['size'])){
+                        if($out['size'] == $d['size']){
+                            return;  
+                        }
+                    }else{
+                        return;
+                    }
                 }
             }        
         } 
