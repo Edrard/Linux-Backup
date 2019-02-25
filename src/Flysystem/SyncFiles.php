@@ -98,7 +98,7 @@ class SyncFiles implements PluginInterface
             if($response = $this->filesystem->deleteDir($dir)){
                 MyLog::info("[Sync] Folder Deleted",array($dir),'main');
             }else{
-                MyLog::error("[Sync] Can`t Delete Folder:",array($dir),'main');
+                MyLog::error("[Sync] Can`t Delete Folder:",array($dir,$response),'main');
             }   
 
         } 
@@ -109,7 +109,7 @@ class SyncFiles implements PluginInterface
             if($response = $this->filesystem->delete($file)){
                 MyLog::info("[Sync] File Deleted",array($file),'main');
             }else{
-                MyLog::error("[Sync] Can`t Delete File:",array($file),'main');
+                MyLog::error("[Sync] Can`t Delete File:",array($file,$response),'main');
             }   
 
         } 
@@ -120,7 +120,7 @@ class SyncFiles implements PluginInterface
             if($response = $this->filesystem->createDir($dir)){
                 MyLog::info("[Sync] Folder created",array($dir),'main');
             }else{
-                MyLog::error("[Sync] Can`t create folder:",array($dir),'main');
+                MyLog::error("[Sync] Can`t create folder:",array($dir,$response),'main');
             }   
         } 
     }
@@ -133,7 +133,7 @@ class SyncFiles implements PluginInterface
             if($response = $this->filesystem->putStream($file,$read)){
                 MyLog::info("[Sync] File update/created",array($file),'main');
             }else{
-                MyLog::error("[Sync] Can`t create/update file:",array($file),'main');
+                MyLog::error("[Sync] Can`t create/update file:",array($file,$response),'main');
             }   
         } 
     }
