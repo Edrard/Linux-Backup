@@ -42,10 +42,11 @@ class ZipFolder
         $contents = static::$filesystem->listContents(static::$src_path,true);
         $i = 0;
         $list = array();
+        $cd = '';
         foreach($contents as $con){ 
             if(($con['timestamp'] > static::$increment || static::$increment == 0) && $con['type'] != 'dir'){
                 $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
-                $cd = str_replace($relative_path,'','/'.$con['path']);
+                $cd = str_replace($relative_path,'','/'.$con['path']);   print_r($cd);
                 $list[] = $relative_path;
                 $i++;
                 if($i >= static::$zip_in){

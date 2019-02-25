@@ -19,6 +19,7 @@ class SyncFiles implements PluginInterface
     protected $file_create = array();
     protected $file_delete = array();
     protected $exclude = array();
+    
 
     public function setFilesystem(FilesystemInterface $filesystem)
     {
@@ -39,17 +40,16 @@ class SyncFiles implements PluginInterface
         try{
             $this->contents = $this->local->listContents($this->src_path, $recursive);
             $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
+            $this->pathMorf();
             MyLog::info("[Sync] Check if exist",array(),'main');
             foreach($this->contents as $key => $way){
-                $this->contents[$key]['path'] = $way['path'] = preg_replace('#^'.trim($this->src_path,'/').'#iU', '', $way['path']);
-
                 //Check if exist 
-                $this->checkIfExist($way);            
+                $this->checkIf($way,'_create','dst');            
             }
             MyLog::info("[Sync] Check if delete",array(),'main');
             foreach($this->dst as $key => $out){
                 //Check if delete 
-                $this->checkIfDelete($out);            
+                $this->checkIf($out,'_delete','contents');            
             }
             MyLog::info("[Sync] Files deleting process starting",array(),'main');
             $this->deleteFiles();
@@ -65,28 +65,16 @@ class SyncFiles implements PluginInterface
         }
         $this->resset();
     }
-    protected function checkIfExist($way){ 
-        foreach($this->dst as $key => $d){  
-            $this->dst[$key]['path'] = $d['path'] = preg_replace('#^'.trim($this->dst_path,'/').'#iU', '', $d['path']); 
-            if($way['type'] == $d['type'] && $way['path'] == $d['path']){
-                if($way['type'] == 'dir'){
-                    return;
-                }elseif(isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
-                    if(isset($out['size']) && isset($d['size'])){
-                        if($out['size'] == $d['size']){
-                            return;  
-                        }
-                    }else{
-                        return;
-                    }
-                }
-            }        
-        }
-        $cr = $way['type'].'_create';
-        $this->{$cr}[] = $way;
+    protected function pathMorf(){
+        foreach($this->dst as $key => $d){ 
+            $this->dst[$key]['path'] = preg_replace('#^'.trim($this->dst_path,'/').'#iU', '', $d['path']); 
+        }  
+        foreach($this->contents as $key => $way){
+            $this->contents[$key]['path'] = preg_replace('#^'.trim($this->src_path,'/').'#iU', '', $way['path']); 
+        } 
     }
-    protected function checkIfDelete($out){
-        foreach($this->contents as $key => $d){
+    protected function checkIf($out,$type,$source){
+        foreach($this->{$source} as $key => $d){
             if($out['type'] == $d['type'] && $out['path'] == $d['path']){
                 if($out['type'] == 'dir'){
                     return;
@@ -101,7 +89,7 @@ class SyncFiles implements PluginInterface
                 }
             }        
         } 
-        $cr = $out['type'].'_delete';
+        $cr = $out['type'].$type;
         $this->{$cr}[] = $out;   
     }
     protected function deleteDirectory(){
