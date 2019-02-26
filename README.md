@@ -40,15 +40,15 @@ Example Config
  "2": {
  "src": "",
  "dstfolder": "\/site\/vamark",
- "local": "base\/MySQL\/",
+ "local": "base\/mysql\/",
  "type": "time",
  "days": "5",
  "months": "0",
- "filename": "MySQL",
+ "filename": "mysql",
  "file inc": "d-m-Y",
- "type backup": "MySQL",
+ "type backup": "mysql",
  "exclude": "",
- "mysqlbase": "MySQL",
+ "mysqlbase": "mysql",
  "mysqlconfig": "1",
  "dst": "1"
  }
@@ -61,7 +61,7 @@ Example Config
  "type": "ftp"
  }
  },
- "MySQL": {
+ "mysql": {
  "1": {
  "host": "local host",
  "user": "root",
@@ -94,7 +94,7 @@ Example Config
 **local** — local folder to keep files, not needed for NowFile type. Can be used in any way absolute or relative path. Must be separated for actions.
 
 **type** — can be "now", "time", "increment"
- (if type backup — MySQL, then always time)
+ (if type backup — mysql, then always time)
  
 **now** — just sync folder changes
 
