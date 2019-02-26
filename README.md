@@ -13,9 +13,9 @@ composer install
     
 ## Use
 
-All ftp php function and exec() function must be removed from disabled function
-exec() used to run linux zip app(having problems with ZipArchive class, becouse of temporary files)
-After installation, configuration it. Main con fig file is — ftp.json
+All ftp php function and exec() function must be removed from "disabled function".
+exec() used to run linux zip app(having problems with ZipArchive class, becouse of temporary files).
+After installation, configuration it. Main config file is — ftp.json
 
 Example Config
 
