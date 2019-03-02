@@ -64,13 +64,13 @@ Abstract Class AbsAction
     protected function increment($filename,$src,$local,$exclude){
         $time = 0;
         $type = 'm';
-        if(date('j') != 1 || FULL_INCREMENT != 1){
+        if(date('j') != 1 && FULL_INCREMENT != 1){      
             $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;   
             $type = 'd'; 
             MyLog::info('Daily Increment Backup start',$this->config,'main');
         }else{
             MyLog::info('Monthly Full Backup start',$this->config,'main');
-        } 
+        }   
         $this->archiveFiles($src,$local,$filename.'-'.$type,$time);
         return $type;
     }
