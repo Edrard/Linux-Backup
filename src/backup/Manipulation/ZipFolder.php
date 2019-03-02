@@ -43,24 +43,40 @@ class ZipFolder
         $i = 0;
         $list = array();
         $cd = '';
-        foreach($contents as $con){ 
-            if(($con['timestamp'] > static::$increment || static::$increment == 0) && $con['type'] != 'dir'){
-                $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
-                $cd = str_replace($relative_path,'','/'.$con['path']);   print_r($cd);
-                $list[] = $relative_path;
-                $i++;
-                if($i >= static::$zip_in){
-                    static::zipList($cd,$list);
-                    $list = array();
-                    $i = 0;    
-                }
-                MyLog::info("Added file to archive ".static::$name.'.zip',array('/'.$con['path']),'main');
-            }   
+        if(static::$increment == 0){
+            $cd = explode('/',static::$src_path);
+            $relative_path = array_pop($cd);
+            $cd = '/'.implode('/',$cd);
+            static::zipFolder($cd,$relative_path);
+            MyLog::info("Added folder to archive ".static::$name.'.zip',array(static::$src_path),'main');    
+        }else{
+            foreach($contents as $con){ 
+                if($con['timestamp'] > static::$increment && $con['type'] != 'dir'){
+                    $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
+                    $cd = str_replace($relative_path,'','/'.$con['path']);   print_r($cd);
+                    $list[] = $relative_path;
+                    $i++;
+                    if($i >= static::$zip_in){
+                        static::zipList($cd,$list);
+                        $list = array();
+                        $i = 0;    
+                    }
+                    MyLog::info("Added file to archive ".static::$name.'.zip',array('/'.$con['path']),'main');
+                }   
+            }
+            static::zipList($cd,$list);
         }
-        static::zipList($cd,$list); 
         MyLog::info("Files zipped",array(),'main'); 
+    }  
+    protected static function zipFolder($cd,$folder){
+        if(!$folder && !$cd){
+            return;
+        }        
+
+        MyLog::info("Adding to zip folder: ".$folder,array($cd),'main');
+        exec('cd '.$cd.' && zip -9 -r '.static::$zipper.' "'.$folder.'"' ); 
     }
-    protected static function zipList($cd,$list){
+    protected static function zipList($cd, array $list){
         if(empty($list)){
             return;
         }        
