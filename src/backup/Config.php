@@ -15,7 +15,18 @@ Class Config
         $this->filename();
         $this->mysql();
         $this->initLog();
-
+        $this->multiSrc();
+    }
+    function multiSrc(){
+        foreach($this->config['backup'] as $key => $back){
+            if($back['src']){
+                $this->config['backup'][$key]['src'] = explode(',',trim($back['src'],',')); 
+                if(!is_array($this->config['backup'][$key]['src']) || empty($this->config['backup'][$key]['src'])){
+                    $this->config['backup'][$key]['src'] = array();
+                    $this->config['backup'][$key]['src'][] =  $back['src'];
+                }
+            }   
+        }   
     }
     function get($name){
         return isset($this->config[$name]) ? $this->config[$name] : FALSE;    

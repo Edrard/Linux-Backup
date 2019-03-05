@@ -19,7 +19,7 @@ class SyncFiles implements PluginInterface
     protected $file_create = array();
     protected $file_delete = array();
     protected $exclude = array();
-    
+    protected $parent = '';
 
     public function setFilesystem(FilesystemInterface $filesystem)
     {
@@ -31,13 +31,15 @@ class SyncFiles implements PluginInterface
         return 'syncFiles';
     }
 
-    public function handle(Filesystem $src, $src_path, $path = null, array $exclude = array(), $recursive = TRUE)
+    public function handle(Filesystem $src, $src_path, $path = null, array $exclude = array(), $parent = '', $recursive = TRUE)
     {
         $this->local = $src;
         $this->src_path = $src_path;
         $this->dst_path = $path === NULL ? '' : $path;
-        $this->exclude = $exclude;    
-        try{
+        $this->exclude = $exclude; 
+        $this->parent = $parent; 
+        $this->parent();  
+        try{                    
             $this->contents = $this->local->listContents($this->src_path, $recursive);
             $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
             $this->pathMorf();
@@ -64,6 +66,13 @@ class SyncFiles implements PluginInterface
             die($e->getMessage());   
         }
         $this->resset();
+    }
+    protected function parent(){
+        if($this->parent){
+            $tmp = explode('/',trim($this->src_path,'/')); 
+            $this->parent = !is_array($tmp) || (is_array($tmp) && empty($tmp)) ? $this->src_path : array_pop($tmp);  
+        } 
+        $this->dst_path = trim($this->dst_path,'/').'/'.$this->parent;   
     }
     protected function pathMorf(){
         foreach($this->dst as $key => $d){ 
@@ -144,6 +153,7 @@ class SyncFiles implements PluginInterface
         $this->dir_delete = array();
         $this->file_create = array();
         $this->file_delete = array();
-        $this->exclude = array();
+        $this->exclude = array();  
+        $this->parent = ''; 
     }
 }

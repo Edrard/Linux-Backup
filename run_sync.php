@@ -10,7 +10,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 define('FULL_INCREMENT',isset($argv[1]) && $argv[1] == 'full' ? 1 : -1);
  
- 
+  
 $config = new backup\Config('ftp.json');
 $new = new backup\Backup($config);
 $new->run();

@@ -1,6 +1,6 @@
 # Linux Backup
  
-Version 2.0.2
+Version 2.1.0
 
 ## Install
 
@@ -87,7 +87,7 @@ Example Config
 }
 ``` 
 
-**src** — source where take files
+**src** — source where take files, can be multiple separated by comma
 
 **dstfolder** — where to store on FTP
 

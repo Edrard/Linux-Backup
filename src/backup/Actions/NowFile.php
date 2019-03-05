@@ -7,7 +7,9 @@ Class NowFile extends AbsAction implements IntProcess
 {
     function run(){
         $this->logRun();
-        $this->rsync($this->config['src'], $this->config['dstfolder']);
+        foreach($this->config['src'] as $src){
+            $this->rsync($src, $this->config['dstfolder'],array(),count($this->config['src']) > 1 ? 1 : '');
+        }
         $this->logEnd();
     }  
 }

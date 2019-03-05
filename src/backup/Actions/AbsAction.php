@@ -53,10 +53,10 @@ Abstract Class AbsAction
         $this->endTime();
         MyLog::info('Backup time execution for '.$this->class.' is '.$this->execution_time,$this->config,'main');
     }
-    protected function rsync($src,$dstfolder,$exclude = array()){
+    protected function rsync($src,$dstfolder,$exclude = array(),$parent = ''){
         MyLog::info('Sync started for config',$this->config,'main');
         $exclude = empty($exclude) ? $this->config['exclude'] : $exclude;
-        $this->dst->syncFiles($this->local,$src,$dstfolder,$exclude); 
+        $this->dst->syncFiles($this->local,$src,$dstfolder,$exclude,$parent); 
     }  
     protected function archiveFiles($loc,$dst,$name,$increment = 0){
         ZipFolder::zip($this->local, $loc, $dst, $increment, $name);        
@@ -70,7 +70,7 @@ Abstract Class AbsAction
             MyLog::info('Daily Increment Backup start',$this->config,'main');
         }else{
             MyLog::info('Monthly Full Backup start',$this->config,'main');
-        }   
+        }    
         $this->archiveFiles($src,$local,$filename.'-'.$type,$time);
         return $type;
     }

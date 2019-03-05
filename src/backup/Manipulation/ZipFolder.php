@@ -53,7 +53,7 @@ class ZipFolder
             foreach($contents as $con){ 
                 if($con['timestamp'] > static::$increment && $con['type'] != 'dir'){
                     $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
-                    $cd = str_replace($relative_path,'','/'.$con['path']);   print_r($cd);
+                    $cd = str_replace($relative_path,'','/'.$con['path']);  
                     $list[] = $relative_path;
                     $i++;
                     if($i >= static::$zip_in){
