@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="description" content="Linux Backup config generator">
+        <title>Linux Backup config generator</title>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row mt-3">
+                <h3>Upload you config</h3>
+            </div>
+            <div id="drop_zone" style="border: 1px solid #e0e0e0; padding:5%; width: 100%; text-align: center; font-size: 26px;">Drop files here</div>
+            <div class="row mt-3">
+                <h3>Backup config</h3>
+            </div>
+            <form id="backups-form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="list-backup">
+                            <div class="accordion" id="backups">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>           
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-primary add" data-type="backup">Add Backup</button>    
+                </div>
+            </div>
+            <div class="row mt-3">
+                <h3>Destination config</h3>
+            </div>
+            <form id="config-form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="list-config">
+                            <div class="accordion" id="configs">
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </form>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-primary add" data-type="config">Add Destination config</button>    
+                </div>
+            </div>
+            <div class="row mt-3">
+                <h3>Mysql config</h3>
+            </div>
+            <form id="mysql-form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="list-mysql">
+                            <div class="accordion" id="mysqls">
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </form>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-primary add" data-type="mysql">Add Mysql Config</button>    
+                </div>
+            </div>
+            <div class="row mt-3">
+                <h3>Log config</h3>
+            </div>
+            <form id="file-form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="list-file">
+                            <div class="accordion" id="files">
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </form>
+            <div class="row mt-3">
+                <h3>Mail config</h3>
+            </div>
+            <form id="mail-form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="list-mail">
+                            <div class="accordion" id="mails">
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </form>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success" id="generate">Generate Config</button>    
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="invisible">
+            <div id="base-item"><div class="card">
+                    <div class="card-header" id="heading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#coll" aria-expanded="true" aria-controls="coll">
+                                <div><input type="text" class="form-control" value="" placeholder="Имя латинские буквы или цифры"></div></button>
+                        </h5>
+                    </div>
+
+                    <div id="coll" class="collapse show" aria-labelledby="heading" data-parent="#items">
+                        <div class="card-body"><button type="button" class="btn btn-danger btn-sm delete-item">Delete</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a id="downloadAnchorElem" style="display:none"></a>
+        <script>
+            var trans = {
+                'ru' : {
+                    'src_backup'      : 'Папка которую резервируем(список через запятую)',
+                    'local_backup'    : 'Локальная папка резервных копий',
+                    'dstfolder_backup': 'Папка назначения',
+                    'filename_backup' : 'Имя файла',
+                    'fileinc_backup'  : 'Добавка к имени файла(в формате date() функции)',
+                    'months_backup'  : 'Количество месяцев(для инкрементного)',
+                    'days_backup'     : 'Количество дней(для временного)',
+                    'mysqlbase_backup': 'Список MySQL баз. Если + то все',
+                    'mysqlconfig_backup' : 'Конфиг доступа MySQL',
+                    'type_backup' : 'Тип бекапа',
+                    'typebackup_backup': 'Тип резервируемых данных',
+                    'dst_backup' : 'Конфиг назначения',
+                    'exclude_backup': 'Исключение(пока не работает)',
+                    'now_backup' : 'Копирование файлов',
+                    'time_backup' : 'Хранить N дней запакованные полные копии',
+                    'increment_backup' : 'Инкрементный каждый день и полный раз в месяц, хранить N месяцев',
+                    'file_backup': 'Файлы',
+                    'mysql_backup': 'MySQL база',
+                    'host_config': 'IP или имя сервера',
+                    'pass_config': 'Пароль',
+                    'type_config': 'Тип',
+                    'user_config': 'Имя пользователя',
+                    'ftp_config': 'FTP',
+                    'full_file': 'Если 1 то полный, если пусто, то только ошибки',
+                    'dst_file': 'Папка для логов',
+                    'smtp_mail': 'SMTP',
+                    'port_mail': 'SMTP порт',
+                    'from_mail': 'Емеил от которого отправляем',
+                    'to_mail': 'Емеилы через запятую комуо отправлять',
+                    'separate_mail': 'Если пусто, то один емеил, если 1, то разделенный(отдельно инфо и ошибки)',
+                    'hostname_mail': 'Идентификатор хоста, обычно хостнейм',
+                    'host_mail': 'IP или имя сервера',
+                    'pass_mail': 'Пароль',
+                    'user_mail': 'Имя пользователя',
+                    'host_mysql': 'IP или имя сервера',
+                    'pass_mysql': 'Пароль',
+                    'user_mysql': 'Имя пользователя',
+                }
+            }
+            var lang = 'ru';
+            var ToggleForm = {
+                toggle : {
+                    'backup':{
+                        'type':{
+                            'time':{
+                                'months' : 1,
+                                'exclude' : 1,
+                                'typebackup': {
+                                }        
+                            },
+                            'now': {
+                                'months' : 1,
+                                'fileinc' : 1,
+                                'exclude' : 1,
+                                'days': 1,
+                                'mysqlbase': 1,
+                                'mysqlconfig': 1,
+                                'filename': 1,
+                                'typebackup': {
+                                    'mysql' : 1   
+                                }  
+                            },
+                            'increment': {
+                                'mysqlbase': 1,
+                                'days': 1,
+                                'mysqlconfig': 1,
+                                'exclude' : 1,
+                                'typebackup': {
+                                    'mysql' : 1   
+                                } 
+                            }
+                        },
+                        'typebackup': {
+                            'file': {
+                                'mysqlbase': 1,
+                                'mysqlconfig': 1,
+                                'type': {}
+                            },
+                            'mysql': {
+                                'src': 1,
+                                'type': {}
+                            }
+                        }
+                    }
+
+                },
+                togglingStart : function(id,global){
+                    for (i = 1; i < id; i++) {
+                        var type = $('#'+global+'s select[data-id="'+i+'"]:first').data('name')
+                        var selected = $('#'+global+'s select[data-id="'+i+'"]:first option:not([disabled]):first').val()
+                        this.toggling(type,i,global,selected);
+                    }        
+                },
+                toggling : function(type,id,global,selected,first){
+                    first   = typeof(first) === 'undefined' ? true : first;
+                    if(first === true){
+                        this.allClean(global,type,id);
+                    }
+                    if(typeof(this.toggle[global]) !== 'undefined' && typeof(this.toggle[global][type]) !== 'undefined' &&  typeof(this.toggle[global][type][selected]) !== 'undefined'){
+                        for (var key in this.toggle[global][type][selected]) {
+                            value = this.toggle[global][type][selected][key];
+                            if(typeof value === 'object'){
+                                for (var inside in value) {
+                                    $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"] option[value="'+inside+'"]').prop('disabled',true);  
+                                }
+                                first === true ?  this.moreTogglingRun(key,id,global) : ''; 
+                            }else{
+                                $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').parents('.form-group').addClass('invisible');
+                            }
+                        }  
+                    }      
+                },
+                moreTogglingRun : function(key,id,global){
+                    if($('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').find(":selected").prop('disabled') === true){
+                        $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').find(":selected").attr('selected',false);
+                        $('#'+global+'s select[data-name="'+key+'"][data-id="'+id+'"] option:not([disabled]):first').attr('selected','selected');
+                    }
+                    var selected = $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').find(":selected").val();
+                    this.toggling(key,id,global,selected,false);    
+                },
+                allClean : function(global,type,id){
+                    $('#'+global+'s #coll'+global+id+' .form-group').each(function(){
+                        $(this).removeClass('invisible');    
+                    })
+                    $('#'+global+'s #coll'+global+id+' option').each(function(){
+                        $(this).prop('disabled',false);    
+                    })
+                }
+            }
+            var GenerateHtml = {
+                item_id : {'backup':1,'mysql':1,'config':1,'mail':1,'file':1},
+                getItemId : function(type){
+                    return this.item_id[type];
+                },
+                item_id_base : function(){
+                    return {'backup':1,'mysql':1,'config':1,'mail':1,'file':1};
+                },
+                base_object :  {},
+                drop_object : {'config':{
+                    'type':{'ftp':'ftp'}
+                    },
+                    'backup':{
+                        'type':{"now":"now","time":"time","increment":"increment"},
+                        'typebackup':{"file":"file","mysql":"mysql"}
+                    }                                
+                },                                                                
+                base : function(){  
+                    if($.isEmptyObject(this.base_object)){ 
+                        this.base_object = JSON.parse('{"backup":{"1":{"type":"now","typebackup":"file","src":"/usr/local/backup","dstfolder":"/site/base","local":"base/","days":"0","months":"0","filename":"base","fileinc":"d-m-Y","mysqlbase":"","mysqlconfig":"","dst":"1","exclude":""}},"config":{"1":{"type":"ftp","host":"mx.com","user":"test","pass":"1111"}},"mysql":{"1":{"host":"localhost","user":"root","pass":"1111"}},"log":{"file":{"dst":"nlog","full":"1"},"mail":{"user":"","pass":"","smtp":"","port":"25","from":"","to":"","separate":"1","hostname":"My Server"}}}') 
+                    }   
+                    return this.base_object;    
+                },
+                current_type : '',
+                constructor :  function(config){
+                    this.base();
+                    this.item_id = this.item_id_base()
+                    this.config   = typeof(config) === 'undefined' ? this.base() : config;
+                    this.generate('backup');
+                    this.generate('config');
+                    this.generate('mysql');
+                    this.generate('file',this.config['log']['file'],'file');
+                    this.generate('mail',this.config['log']['mail'],'mail');
+                    return this;
+                },
+                generate: function(type,config,name){
+                    var add_name = '';
+                    if(typeof(name) !== 'undefined'){
+                        add_name = name;   
+                    }
+                    var state =  type != 'file' && type != 'mail';
+                    if(typeof(config) === 'undefined' || config === null){
+                        config = {};
+                        if(state !== false){
+                            config = this.config[type];   
+                        }else{
+                            config[1] = this.config['log'][type];    
+                        }
+                    }else if(state === false){
+                        tmp = config;
+                        config = {};
+                        config[1] = tmp;    
+                    } 
+                    for(var name in config){
+                        this.current_type = type; 
+                        $( "#base-item > div" ).clone().appendTo( "#"+type+"s" );
+                        this.baseItemChange(this.item_id[type],'#'+type+'s',type);
+                        $( this.multiGenerator(config[name],type) ).appendTo( "#coll"+type+this.item_id[type]+" .card-body" );
+                        $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('value',add_name+name);
+                        if(!state){
+                            $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('readonly','readonly'); 
+                            $('#'+type+'s [data-toggle=collapse]').prop('disabled',true);
+                            $('#'+type+'s .delete-item').remove();  
+                        }
+                        $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('name','name['+this.item_id[type]+']');
+                        $("#"+type+"s #coll"+type+this.item_id[type]).collapse('show')
+                        this.item_id[type]++;
+                    }
+                    return this.item_id[type] - 1;
+                },
+                multiGenerator : function(config,type,first){
+                    var html = typeof(first) === 'undefined' ? '<div class="mt-3"></div>' : first;    
+                    for (var key in config){
+                        if(this.drop_object.hasOwnProperty(type) && this.drop_object[type].hasOwnProperty(key)){
+                            html += this.genDrop(key,config[key],this.drop_object[type][key],type);    
+                        }else{
+                            html += this.genText(key,config[key],type);
+                        }
+                    } 
+                    return html;
+                },
+                genText: function(forin,value,type){
+                    return '<div class="form-group row">'+
+                    '<label for="'+forin+'" class="col-sm-4 col-form-label">'+trans[lang][forin+'_'+type]+'</label>'+
+                    '<div class="col-sm-8">'+
+                    '<input name="'+forin+'['+this.item_id[this.current_type]+']" data-name="'+forin+'" type="text" class="form-control" value="'+value+'" data-id="'+this.item_id[this.current_type]+'">'+
+                    '</div>'+
+                    '</div>';
+                },
+                genDrop: function(forin,value,option,type){
+                    var options = '';
+                    for( var el in option ) {
+                        if( option.hasOwnProperty( el ) ) {
+                            var selected = option[el] == value ? ' selected' : '';
+                            options +=  '<option value="'+option[el]+'"'+selected+'>'+trans[lang][option[el]+'_'+type]+'</option>'
+                        }
+                    }
+                    return '<div class="form-group row">'+
+                    '<label for="'+forin+'" class="col-sm-4 col-form-label">'+trans[lang][forin+'_'+type]+'</label>'+
+                    '<div class="col-sm-8">'+
+                    '<select name="'+forin+'['+this.item_id[this.current_type]+']" class="form-control" data-name="'+forin+'" data-id="'+this.item_id[this.current_type]+'" data-global="'+this.current_type+'">'+options+
+                    '</select>'+
+                    '</div>'+
+                    '</div>';
+                },
+                baseItemChange : function(id,inup,type){ 
+                    if(id > 1){
+                        $(inup+' #coll').attr('class','collapse');
+                    }
+                    this.addAttr('data-target',inup+' #heading button',type+id);
+                    this.addAttr('aria-controls',inup+' #heading button',type+id);
+                    this.addAttr('aria-labelledby',inup+' #coll',type+id);
+                    this.addAttr('id',inup+' #coll',type+id);
+                    this.changeAttr('data-parent',inup+' #coll'+type+id,'#'+type+'s');
+                    this.addAttr('id',inup+' #heading',type+id);
+                },
+                changeAttr : function(attr,elem,add){
+                    $(elem).attr(attr,add);    
+                },
+                addAttr : function(attr,elem,add){
+                    var now = $(elem).attr(attr); 
+                    $(elem).attr(attr,now+add);    
+                }
+            }
+            var GenerateHtmlStatr = Object.create(GenerateHtml).constructor();
+
+            ToggleForm.togglingStart(1,'backup');
+
+            function is_json(str) {
+                try {
+                    JSON.parse(str);
+                } catch (e) {
+                    return false;
+                }
+                return true;
+            }
+            function handleFileSelect(evt) {
+
+                evt.stopPropagation();
+                evt.preventDefault(); 
+                var files = evt.target.files || evt.dataTransfer.files;
+                // Loop through the FileList and render image files as thumbnails.
+                for (var i = 0, file; file = files[i]; i++) {
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var text = e.target.result;
+                        if(is_json(text) !== false){
+                            $('.container .card').remove();
+                            var config = JSON.parse(text);
+                            GenerateHtmlStatr = Object.create(GenerateHtml).constructor(config); 
+                            console.log(GenerateHtmlStatr);
+                            ToggleForm.togglingStart(GenerateHtmlStatr.item_id['backup'],'backup');
+                        }
+                    }
+                    reader.readAsText(file);
+                }
+            }
+
+            function handleDragOver(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+                evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+            }
+
+            // Setup the dnd listeners.
+            var dropZone = document.getElementById('drop_zone');
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleFileSelect, false);
+            $('.add').on('click',function(){
+                var type = $(this).attr('data-type');
+                var id = GenerateHtmlStatr.generate(type,GenerateHtmlStatr.base_object[type],'add'+GenerateHtmlStatr.getItemId(type));
+                ToggleForm.togglingStart(id,type)
+            })
+            $(document).on('click','.delete-item',function(){
+                if($(this).parents('.accordion').children('.card').length > 1){
+                    $(this).parents('.card').remove();
+                }
+            })
+            $(document).on('change','select',function(){
+                ToggleForm.toggling($(this).data('name'),$(this).data('id'),$(this).data('global'),this.value);
+            })
+            function generateObject( backup ){ 
+                result = {};
+                tmp = {};
+                names = {}
+                for( var el in backup ) {
+                    if( backup.hasOwnProperty( el ) ) {
+                        name = backup[el]['name'];
+                        value = backup[el]['value'];
+                        preg = name.match(/(.*)\[(\d*)\]/i);
+                        id = preg[2];
+                        name = preg[1];
+                        if(name == 'name'){
+                            names[id] = value;            
+                        }else{
+                            if(typeof(tmp[id]) == 'undefined'){
+                                tmp[id] = {};
+                            }
+                            tmp[id][name] = value;
+                        }
+                    }
+                }
+                for( var el in tmp ) {
+                    if( tmp.hasOwnProperty( el ) ) {
+                        id = names[el];
+                        if(typeof(id) == 'undefined'){
+                            result = tmp[el];
+                        }else{
+                            result[id] = tmp[el];
+                        }
+                    }
+                }
+                return result;
+            }
+            $(document).on('click','#generate',function(){
+                var backup = {};
+                backup['backup'] = generateObject($('#backups-form').serializeArray());
+                backup['config'] = generateObject($('#config-form').serializeArray());
+                backup['mail'] = generateObject($('#mail-form').serializeArray());
+                backup['mysql'] = generateObject($('#mysql-form').serializeArray());
+                backup['log'] = {};
+                backup['log']['mail'] = generateObject($('#mail-form').serializeArray());
+                backup['log']['file'] = generateObject($('#file-form').serializeArray());
+                var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
+                var dlAnchorElem = document.getElementById('downloadAnchorElem');
+                dlAnchorElem.setAttribute("href",     dataStr     );
+                dlAnchorElem.setAttribute("download", "scene.json");
+                dlAnchorElem.click();
+            })
+        </script>
+    </body>
+</html>
