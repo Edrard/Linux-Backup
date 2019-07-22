@@ -1,7 +1,8 @@
-<?php 
+<?php
+
 namespace backup\Actions;
 
-
-interface IntProcess {
+interface IntProcess
+{
     public function run();
-} 
+}

@@ -1,19 +1,25 @@
 <?php
+
 namespace Flysystem;
 
-use League\Flysystem\FilesystemInterface;
-use League\Flysystem\PluginInterface;
-use League\Flysystem\Filesystem;
-use edrard\Log\MyLog;
 use Emgag\Flysystem\Hash\HashPlugin;
+use League\Flysystem\Filesystem;
 
 class GenerateMd5
 {
-    static function generate(Filesystem $source, $path = null, $recursive = TRUE){
+    /**
+    * put your comment there...
+    *
+    * @param Filesystem $source
+    * @param string $path
+    * @param bool $recursive
+    */
+    public static function generate(Filesystem $source, $path = null, $recursive = true)
+    {
         $return = $source->listContents($path, $recursive);
-        $source->addPlugin(new HashPlugin);
-        foreach($return as $key => $val){
-            if($val['type'] != 'dir'){
+        $source->addPlugin(new HashPlugin());
+        foreach ($return as $key => $val) {
+            if ($val['type'] != 'dir') {
                 $return[$key]['md5'] = $source->hash($val['dirname'].'/'.$val['basename'], 'md5');
             }
         }

@@ -1,12 +1,12 @@
 {
     "backup": {
     "1": {
-        "src": "\/usr\/local\/backup",
-        "dstfolder": "\/site\/base",
-        "local": "base\/",
+        "src": "/usr/local/backup",
+        "dstfolder": "/site/base",
+        "local": "base/",
         "type": "now",
         "days": "0",
-        "mounths": "0",
+        "months": "0",
         "filename": "base",
         "fileinc": "d-m-Y",
         "typebackup": "file",
@@ -16,9 +16,9 @@
         "dst": "1"
     },
     "2": {
-        "src": "\/var\/www\/vhosts\/test2.wot-news.com\/http\/soft\/linux_backup\/",
-        "dstfolder": "\/site\/otrs",
-        "local": "base\/otrs",
+        "src": "/var/www/vhosts/test2.wot-news.com/http/soft/linux_backup/",
+        "dstfolder": "/site/otrs",
+        "local": "base/otrs",
         "type": "increment",
         "days": "1",
         "months": "1",
@@ -31,9 +31,9 @@
         "dst": "1"
     },
     "3": {
-        "src": "\/opt\/selenium\/",
-        "dstfolder": "\/site\/selenium",
-        "local": "base\/selenium\/",
+        "src": "/opt/selenium/",
+        "dstfolder": "/site/selenium",
+        "local": "base/selenium/",
         "type": "time",
         "days": "5",
         "months": "0",
@@ -47,8 +47,8 @@
     },
     "4": {
         "src": "",
-        "dstfolder": "\/site\/vamark",
-        "local": "base\/mysql\/",
+        "dstfolder": "/site/vamark",
+        "local": "base/mysql/",
         "type": "time",
         "days": "5",
         "months": "0",
@@ -93,6 +93,4 @@
         }
     }
 }
-
-
-
+    

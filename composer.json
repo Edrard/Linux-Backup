@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
+        "php": ">=7.1.0",
         "edrard/function": "dev-master",
         "edrard/MyLog": "dev-master",
         "league/flysystem": "^1.0",
@@ -35,5 +35,8 @@
         "Flysystem\\": "src/Flysystem",
         "Exc\\": "src/Exc"
         }
+    },
+    "require-dev": {
+        "nunomaduro/phpinsights": "^1.7"
     }
 }

@@ -1,10 +1,11 @@
 <?php
+
 namespace Flysystem;
 
+use edrard\Log\MyLog;
+use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\PluginInterface;
-use League\Flysystem\Filesystem;
-use edrard\Log\MyLog;
 
 class SyncFiles implements PluginInterface
 {
@@ -12,148 +13,199 @@ class SyncFiles implements PluginInterface
     protected $local;
     protected $src_path;
     protected $dst_path;
-    protected $contents = array();
-    protected $dst = array();
-    protected $dir_create = array();
-    protected $dir_delete = array();
-    protected $file_create = array();
-    protected $file_delete = array();
-    protected $exclude = array();
+    protected $contents = [];
+    protected $dst = [];
+    protected $dir_create = [];
+    protected $dir_delete = [];
+    protected $file_create = [];
+    protected $file_delete = [];
+    protected $exclude = [];
     protected $parent = '';
 
+    /**
+    * put your comment there...
+    *
+    * @param FilesystemInterface $filesystem
+    */
     public function setFilesystem(FilesystemInterface $filesystem)
     {
         $this->filesystem = $filesystem;
     }
-
+    /**
+    * put your comment there...
+    *
+    */
     public function getMethod()
     {
         return 'syncFiles';
     }
-
-    public function handle(Filesystem $src, $src_path, $path = null, array $exclude = array(), $parent = '', $recursive = TRUE)
+    /**
+    * put your comment there...
+    *
+    * @param Filesystem $src
+    * @param string $src_path
+    * @param string $path
+    * @param array $exclude
+    * @param string $parent
+    * @param bool $recursive
+    */
+    public function handle(Filesystem $src, $src_path, $path = null, array $exclude = [], $parent = '', $recursive = true)
     {
         $this->local = $src;
         $this->src_path = $src_path;
-        $this->dst_path = $path === NULL ? '' : $path;
-        $this->exclude = $exclude; 
-        $this->parent = $parent; 
-        $this->parent();  
-        try{                    
+        $this->dst_path = $path === null ? '' : $path;
+        $this->exclude = $exclude;
+        $this->parent = $parent;
+        $this->parent();
+        try {
             $this->contents = $this->local->listContents($this->src_path, $recursive);
             $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
             $this->pathMorf();
-            MyLog::info("[Sync] Check if exist",array(),'main');
-            foreach($this->contents as $key => $way){
-                //Check if exist 
-                $this->checkIf($way,'_create','dst');            
+            MyLog::info("[Sync] Check if exist", [], 'main');
+            foreach ($this->contents as $way) {
+                //Check if exist
+                $this->checkIf($way, '_create', 'dst');
             }
-            MyLog::info("[Sync] Check if delete",array(),'main');
-            foreach($this->dst as $key => $out){
-                //Check if delete 
-                $this->checkIf($out,'_delete','contents');            
+            MyLog::info("[Sync] Check if delete", [], 'main');
+            foreach ($this->dst as $out) {
+                //Check if delete
+                $this->checkIf($out, '_delete', 'contents');
             }
-            MyLog::info("[Sync] Files deleting process starting",array(),'main');
+            MyLog::info("[Sync] Files deleting process starting", [], 'main');
             $this->deleteFiles();
-            MyLog::info("[Sync] Directory deleting process starting",array(),'main');
+            MyLog::info("[Sync] Directory deleting process starting", [], 'main');
             $this->deleteDirectory();
-            MyLog::info("[Sync] Directory creating process starting",array(),'main');
+            MyLog::info("[Sync] Directory creating process starting", [], 'main');
             $this->createDirectory();
-            MyLog::info("[Sync] Files copy process starting",array(),'main');
-            $this->CopyUpdateFiles();                            
-        }Catch(\Exception $e){
-            MyLog::error('[SyncFiles] '.$e->getMessage()); 
-            die($e->getMessage());   
+            MyLog::info("[Sync] Files copy process starting", [], 'main');
+            $this->copyUpdateFiles();
+        } catch (\Exception $error) {
+            MyLog::error('[SyncFiles] '.$error->getMessage());
+            die($error->getMessage());
         }
         $this->resset();
     }
-    protected function parent(){
-        if($this->parent){
-            $tmp = explode('/',trim($this->src_path,'/')); 
-            $this->parent = !is_array($tmp) || (is_array($tmp) && empty($tmp)) ? $this->src_path : array_pop($tmp);  
-        } 
-        $this->dst_path = trim($this->dst_path,'/').'/'.$this->parent;   
+    /**
+    * put your comment there...
+    *
+    */
+    protected function parent()
+    {
+        if ($this->parent) {
+            $tmp = explode('/', trim($this->src_path, '/'));
+            $this->parent = ! is_array($tmp) || (is_array($tmp) && ($tmp) === []) ? $this->src_path : array_pop($tmp);
+        }
+        $this->dst_path = trim($this->dst_path, '/').'/'.$this->parent;
     }
-    protected function pathMorf(){
-        foreach($this->dst as $key => $d){ 
-            $this->dst[$key]['path'] = preg_replace('#^'.trim($this->dst_path,'/').'#iU', '', $d['path']); 
-        }  
-        foreach($this->contents as $key => $way){
-            $this->contents[$key]['path'] = preg_replace('#^'.trim($this->src_path,'/').'#iU', '', $way['path']); 
-        } 
+    /**
+    * put your comment there...
+    *
+    */
+    protected function pathMorf()
+    {
+        foreach ($this->dst as $key => $distination) {
+            $this->dst[$key]['path'] = preg_replace('#^'.trim($this->dst_path, '/').'#iU', '', $distination['path']);
+        }
+        foreach ($this->contents as $key => $way) {
+            $this->contents[$key]['path'] = preg_replace('#^'.trim($this->src_path, '/').'#iU', '', $way['path']);
+        }
     }
-    protected function checkIf($out,$type,$source){
-        foreach($this->{$source} as $key => $d){
-            if($out['type'] == $d['type'] && $out['path'] == $d['path']){
-                if($out['type'] == 'dir'){
+    /**
+    * put your comment there...
+    *
+    * @param string $out
+    * @param string $type
+    * @param string $source
+    *
+    */
+    protected function checkIf($out, $type, $source)
+    {
+        foreach ($this->{$source} as $directory) {
+            if ($out['type'] == $directory['type'] && $out['path'] == $directory['path']) {
+                if ($out['type'] == 'dir') {
                     return;
-                }elseif(isset($out['basename']) && isset($d['basename']) && $out['basename'] == $d['basename']){
-                    if(isset($out['size']) && isset($d['size'])){
-                        if($out['size'] == $d['size']){
-                            return;  
+                } elseif (isset($out['basename']) && isset($directory['basename']) && $out['basename'] == $directory['basename']) {
+                    if (isset($out['size']) && isset($directory['size'])) {
+                        if ($out['size'] == $directory['size']) {
+                            return;
                         }
-                    }else{
+                    } else {
                         return;
                     }
                 }
-            }        
-        } 
-        $cr = $out['type'].$type;
-        $this->{$cr}[] = $out;   
+            }
+        }
+        $create = $out['type'].$type;
+        $this->{$create}[] = $out;
     }
-    protected function deleteDirectory(){
-        foreach($this->dir_delete as $del){
-            $dir = '/'.trim($this->dst_path,'/').$del['path'];
-            if($response = $this->filesystem->deleteDir($dir)){
-                MyLog::info("[Sync] Folder Deleted",array($dir),'main');
-            }else{
-                MyLog::error("[Sync] Can`t Delete Folder:",array($dir,$response),'main');
-            }   
-
-        } 
+    /**
+    * put your comment there...
+    *
+    */
+    protected function deleteDirectory()
+    {
+        foreach ($this->dir_delete as $del) {
+            $dir = '/'.trim($this->dst_path, '/').$del['path'];
+            $response = $this->filesystem->deleteDir($dir);
+            $response ? MyLog::info("[Sync] Folder Deleted", [$dir], 'main')
+            : MyLog::error("[Sync] Can`t Delete Folder:", [$dir,$response], 'main');
+        }
     }
-    protected function deleteFiles(){ 
-        foreach($this->file_delete as $del){
-            $file = '/'.trim($this->dst_path,'/').$del['path'];
-            if($response = $this->filesystem->delete($file)){
-                MyLog::info("[Sync] File Deleted",array($file),'main');
-            }else{
-                MyLog::error("[Sync] Can`t Delete File:",array($file,$response),'main');
-            }   
-
-        } 
+    /**
+    * put your comment there...
+    *
+    */
+    protected function deleteFiles()
+    {
+        foreach ($this->file_delete as $del) {
+            $file = '/'.trim($this->dst_path, '/').$del['path'];
+            $response = $this->filesystem->delete($file);
+            $response ? MyLog::info("[Sync] File Deleted", [$file], 'main')
+            : MyLog::error("[Sync] Can`t Delete File:", [$file,$response], 'main');
+        }
     }
-    protected function createDirectory(){
-        foreach($this->dir_create as $cr){ 
-            $dir = '/'.trim($this->dst_path,'/').$cr['path'];
-            if($response = $this->filesystem->createDir($dir)){
-                MyLog::info("[Sync] Folder created",array($dir),'main');
-            }else{
-                MyLog::error("[Sync] Can`t create folder:",array($dir,$response),'main');
-            }   
-        } 
+    /**
+    * put your comment there...
+    *
+    */
+    protected function createDirectory()
+    {
+        foreach ($this->dir_create as $creat_dir) {
+            $dir = '/'.trim($this->dst_path, '/').$creat_dir['path'];
+            $response = $this->filesystem->createDir($dir);
+            $response ? MyLog::info("[Sync] Folder created", [$dir], 'main')
+            : MyLog::error("[Sync] Can`t create folder:", [$dir,$response], 'main');
+        }
     }
-    protected function CopyUpdateFiles(){
+    /**
+    * put your comment there...
+    *
+    */
+    protected function copyUpdateFiles()
+    {
         // $this->file_create
-        foreach($this->file_create as $cr){
-            $file = '/'.trim($this->dst_path,'/').$cr['path'];
-            $local = '/'.trim($this->src_path,'/').$cr['path'];
+        foreach ($this->file_create as $file_create) {
+            $file = '/'.trim($this->dst_path, '/').$file_create['path'];
+            $local = '/'.trim($this->src_path, '/').$file_create['path'];
             $read = $this->local->readStream($local);
-            if($response = $this->filesystem->putStream($file,$read)){
-                MyLog::info("[Sync] File update/created",array($file),'main');
-            }else{
-                MyLog::error("[Sync] Can`t create/update file:",array($file,$response),'main');
-            }   
-        } 
+            $response = $this->filesystem->putStream($file, $read);
+            $response ? MyLog::info("[Sync] File update/created", [$file], 'main')
+            : MyLog::error("[Sync] Can`t create/update file:", [$file,$response], 'main');
+        }
     }
-    protected function resset(){
-        $this->contents = array();
-        $this->dst = array();
-        $this->dir_create = array();
-        $this->dir_delete = array();
-        $this->file_create = array();
-        $this->file_delete = array();
-        $this->exclude = array();  
-        $this->parent = ''; 
+    /**
+    * put your comment there...
+    *
+    */
+    protected function resset()
+    {
+        $this->contents = [];
+        $this->dst = [];
+        $this->dir_create = [];
+        $this->dir_delete = [];
+        $this->file_create = [];
+        $this->file_delete = [];
+        $this->exclude = [];
+        $this->parent = '';
     }
 }

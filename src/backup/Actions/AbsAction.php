@@ -1,15 +1,16 @@
 <?php
+
 namespace backup\Actions;
 
-use League\Flysystem\Filesystem;
 use backup\Manipulation\DeleteOld;
-use backup\Manipulation\ZipFolder;
 use backup\Manipulation\ZipFiles;
+use backup\Manipulation\ZipFolder;
 use Carbon\Carbon;
 use edrard\Log\MyLog;
 use Ifsnop\Mysqldump as IMysqldump;
+use League\Flysystem\Filesystem;
 
-Abstract Class AbsAction
+abstract class AbsAction
 {
     protected $config;
     protected $dst;
@@ -20,7 +21,16 @@ Abstract Class AbsAction
     protected $execution_time;
     protected $class;
 
-    function __construct(array $config, Filesystem $dst, Filesystem $local, array $mysql){
+    /**
+    * put your comment there...
+    *
+    * @param array $config
+    * @param Filesystem $dst
+    * @param Filesystem $local
+    * @param array $mysql
+    */
+    public function __construct(array $config, Filesystem $dst, Filesystem $local, array $mysql)
+    {
         $this->config = $config;
         $this->dst = $dst;
         $this->mysql = $mysql;
@@ -28,77 +38,167 @@ Abstract Class AbsAction
         $this->checkLocalExist();
         $this->classGet();
         $this->startTime();
-    } 
-    function classGet(){
-        $class = explode('\\', get_class($this));
+    }
+    /**
+    * put your comment there...
+    *
+    */
+    public function classGet()
+    {
+        $class = explode('\\', self::class);
         $this->class =  array_pop($class);
     }
-    function logRun(){
-        MyLog::info('Starting backup process '.$this->class.' with config',$this->config,'main');
+    /**
+    * put your comment there...
+    *
+    */
+    public function logRun()
+    {
+        MyLog::info('Starting backup process '.$this->class.' with config', $this->config, 'main');
     }
-    function getConfig(){
+    /**
+    * put your comment there...
+    *
+    */
+    public function getConfig()
+    {
         return $this-config;
     }
-    function checkLocalExist(){
-        $this->local->createDir($this->config['local']);    
-    }  
-    protected function startTime(){
-        $this->time_start = microtime(true); 
+    /**
+    * put your comment there...
+    *
+    */
+    public function checkLocalExist()
+    {
+        $this->local->createDir($this->config['local']);
     }
-    protected function endTime(){
+    /**
+    * put your comment there...
+    *
+    */
+    protected function startTime()
+    {
+        $this->time_start = microtime(true);
+    }
+    /**
+    * put your comment there...
+    *
+    */
+    protected function endTime()
+    {
         $this->time_end = microtime(true);
-        $this->execution_time = ($this->time_end - $this->time_start);
+        $this->execution_time = $this->time_end - $this->time_start;
     }
-    protected function logEnd(){
+    /**
+    * put your comment there...
+    *
+    */
+    protected function logEnd()
+    {
         $this->endTime();
-        MyLog::info('Backup time execution for '.$this->class.' is '.$this->execution_time,$this->config,'main');
+        MyLog::info('Backup time execution for '.$this->class.' is '.$this->execution_time, $this->config, 'main');
     }
-    protected function rsync($src,$dstfolder,$exclude = array(),$parent = ''){
-        MyLog::info('Sync started for config',$this->config,'main');
-        $exclude = empty($exclude) ? $this->config['exclude'] : $exclude;
-        $this->dst->syncFiles($this->local,$src,$dstfolder,$exclude,$parent); 
-    }  
-    protected function archiveFiles($loc,$dst,$name,$increment = 0){
-        ZipFolder::zip($this->local, $loc, $dst, $increment, $name);        
+    /**
+    * put your comment there...
+    *
+    * @param string $src
+    * @param string $dstfolder
+    * @param array $exclude
+    * @param string $parent
+    */
+    protected function rsync($src, $dstfolder, array $exclude = [], $parent = '')
+    {
+        MyLog::info('Sync started for config', $this->config, 'main');
+        $exclude = $exclude === [] ? $this->config['exclude'] : $exclude;
+        $this->dst->syncFiles($this->local, $src, $dstfolder, $exclude, $parent);
     }
-    protected function increment($filename,$src,$local,$exclude){
+    /**
+    * put your comment there...
+    *
+    * @param string $loc
+    * @param string $dst
+    * @param string $name
+    * @param int $increment
+    */
+    protected function archiveFiles($loc, $dst, $name, $increment = 0)
+    {
+        ZipFolder::zip($this->local, $loc, $dst, $increment, $name);
+    }
+    /**
+    * put your comment there...
+    *
+    * @param string $filename
+    * @param string $src
+    * @param string $local
+    * @param array $exclude
+    */
+    protected function increment($filename, $src, $local, $exclude)
+    {
         $time = 0;
         $type = 'm';
-        if(date('j') != 1 && FULL_INCREMENT != 1){      
-            $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;   
-            $type = 'd'; 
-            MyLog::info('Daily Increment Backup start',$this->config,'main');
-        }else{
-            MyLog::info('Monthly Full Backup start',$this->config,'main');
-        }    
-        $this->archiveFiles($src,$local,$filename.'-'.$type,$time);
+        $exclude = $exclude;
+        if (date('j') != 1) {
+            $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;
+            $type = 'd';
+            MyLog::info('Daily Increment Backup start', $this->config, 'main');
+        } else {
+            MyLog::info('Monthly Full Backup start', $this->config, 'main');
+        }
+        $this->archiveFiles($src, $local, $filename.'-'.$type, $time);
         return $type;
     }
-    protected function deleteOld($filename,$local,$time){ 
-        DeleteOld::delete($this->local,$filename,$local,$time);
+    /**
+    * put your comment there...
+    *
+    * @param string $filename
+    * @param string $local
+    * @param string $time
+    */
+    protected function deleteOld($filename, $local, $time)
+    {
+        DeleteOld::delete($this->local, $filename, $local, $time);
     }
-    protected function mysqlDump($localhost, $user, $pass, $filename,$time,$local,$mysqlbase){
-        try { 
-            foreach($mysqlbase as $base){
-                $files[] = '/'.trim($local,'/').'/'.$base.'.sql';
-                $dump = new IMysqldump\Mysqldump('mysql:host='.$localhost.';dbname='.$base, $user, $pass,array('lock-tables' => false));
-                $dump->start('/'.trim($local,'/').'/'.$base.'.sql');
+    /**
+    * put your comment there...
+    *
+    * @param string $localhost
+    * @param string $user
+    * @param string $pass
+    * @param string $filename
+    * @param string $local
+    * @param array $mysqlbase
+    */
+    protected function mysqlDump($localhost, $user, $pass, $filename, $local, array $mysqlbase)
+    {
+        try {
+            $files = [];
+            foreach ($mysqlbase as $base) {
+                $files[] = '/'.trim($local, '/').'/'.$base.'.sql';
+                $dump = new IMysqldump\Mysqldump('mysql:host='.$localhost.';dbname='.$base, $user, $pass, ['lock-tables' => false]);
+                $dump->start('/'.trim($local, '/').'/'.$base.'.sql');
             }
-            ZipFiles::zip($filename,$local,$files); 
-            foreach($files as $file){
+            ZipFiles::zip($filename, $local, $files);
+            foreach ($files as $file) {
                 $this->local->delete($file);
             }
-        } catch (\Exception $e) {
-            echo '[DumpMySQL] ' . $e->getMessage();
+        } catch (\Exception $error) {
+            echo '[DumpMySQL] ' . $error->getMessage();
         }
     }
-    protected function mysqlAllBases($localhost, $user, $pass){
-        $dbh = new \PDO( "mysql:host=$localhost", $user, $pass );
-        $dbs = $dbh->query( 'SHOW DATABASES' );
-        $return = array();
-        while( ( $db = $dbs->fetchColumn( 0 ) ) !== false )
-        {
-            $return[] = $db;
+    /**
+    * put your comment there...
+    *
+    * @param string $localhost
+    * @param string $user
+    * @param string $pass
+    */
+    protected function mysqlAllBases($localhost, $user, $pass)
+    {
+        $dbh = new \PDO("mysql:host=$localhost", $user, $pass);
+        $dbs = $dbh->query('SHOW DATABASES');
+        $return = [];
+        while (($data_base = $dbs->fetchColumn(0)) !== false) {
+            $return[] = $data_base;
         }
         return $return;
     }

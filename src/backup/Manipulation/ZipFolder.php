@@ -1,11 +1,10 @@
 <?php
+
 namespace backup\Manipulation;
 
-use League\Flysystem\FilesystemInterface;
-use League\Flysystem\Filesystem;
 use edrard\Log\MyLog;
 use Exc\Base;
-use Carbon\Carbon;
+use League\Flysystem\Filesystem;
 
 class ZipFolder
 {
@@ -14,78 +13,143 @@ class ZipFolder
     protected static $where;
     protected static $increment;
     protected static $name;
-    protected static $zipper; 
+    protected static $zipper;
     protected static $zip_in = 100;
 
-    public static function zip(Filesystem $file, $src_path, $where = null, $increment = 0, $name, $recursive = TRUE)
-    {
-
-        static::$src_path = trim($src_path,'/');
-        static::$where = $where === NULL ? '' : trim($where,'/');
-        static::$increment = $increment;  
+    /**
+    * put your comment there...
+    *
+    * @param Filesystem $file
+    * @param string $src_path Source path
+    * @param string $where Local path
+    * @param string $increment Increment time
+    * @param string $name file name
+    */
+    public static function zip(
+        Filesystem $file,
+        $src_path,
+        $where = null,
+        $increment,
+        $name
+    ) {
+        static::$src_path = trim($src_path, '/');
+        static::$where = $where === null ? '' : trim($where, '/');
+        static::$increment = $increment;
         static::$name = $name;
         static::$filesystem = $file;
-        static::$zipper = '/'.static::$where.'/'.static::$name.'.zip'; 
+        static::$zipper = '/'.static::$where.'/'.static::$name.'.zip';
         //dd('/'.static::$where.'/'.static::$name.'.zip');
-        try{
+        try {
             //dd( static::$src_path, static::$where,static::$increment,static::$name,static::$filesystem);
-            if(!$name){ 
-                throw new Base('No name setted','error');
+            if (! $name) {
+                throw new Base('No name setted', 'error');
             }
             static::zipRun();
-        }Catch(Base $e){
-            MyLog::error('[ZipFolder] '.$e->getMessage()); 
-            die($e->getMessage());   
+        } catch (Base $error) {
+            MyLog::error('[ZipFolder] '.$error->getMessage());
+            die($error->getMessage());
         }
     }
-    protected static function zipRun(){
-        $contents = static::$filesystem->listContents(static::$src_path,true);
-        $i = 0;
-        $list = array();
-        $cd = '';
-        if(static::$increment == 0){
-            $cd = explode('/',static::$src_path);
-            $relative_path = array_pop($cd);
-            $cd = '/'.implode('/',$cd);
-            static::zipFolder($cd,$relative_path);
-            MyLog::info("Added folder to archive ".static::$name.'.zip',array(static::$src_path),'main');    
-        }else{
-            foreach($contents as $con){ 
-                if($con['timestamp'] > static::$increment && $con['type'] != 'dir'){
-                    $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
-                    $cd = str_replace($relative_path,'','/'.$con['path']);  
-                    $list[] = $relative_path;
-                    $i++;
-                    if($i >= static::$zip_in){
-                        static::zipList($cd,$list);
-                        $list = array();
-                        $i = 0;    
-                    }
-                    MyLog::info("Added file to archive ".static::$name.'.zip',array('/'.$con['path']),'main');
-                }   
-            }
-            static::zipList($cd,$list);
-        }
-        MyLog::info("Files zipped",array(),'main'); 
-    }  
-    protected static function zipFolder($cd,$folder){
-        if(!$folder && !$cd){
-            return;
-        }        
+    /**
+    * put your comment there...
+    *
+    */
+    protected static function zipRun()
+    {
+        static::$increment == 0 ?
+        static::nonIncrementZip() :
+        static::incrementZip();
 
-        MyLog::info("Adding to zip folder: ".$folder,array($cd),'main');
-        exec('cd '.$cd.' && zip -9 -r '.static::$zipper.' "'.$folder.'"' ); 
+        MyLog::info("Files zipped", [], 'main');
     }
-    protected static function zipList($cd, array $list){
-        if(empty($list)){
+    /**
+    * put your comment there...
+    *
+    */
+    protected static function incrementZip()
+    {
+        $contents = static::$filesystem->listContents(static::$src_path, true);
+        $i = 0;
+        $list = [];
+        $change_dir = '';
+        foreach ($contents as $con) {
+            if ($con['timestamp'] > static::$increment && $con['type'] != 'dir') {
+                $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
+                $change_dir = str_replace($relative_path, '', '/'.$con['path']);
+                $list[] = $relative_path;
+                $i++;
+                static::ressetCounter($i, $change_dir, $list);
+                MyLog::info(
+                    "Added file to archive ".static::$name.'.zip',
+                    ['/'.$con['path']],
+                    'main'
+                );
+            }
+        }
+        static::zipList($change_dir, $list);
+    }
+    /**
+    * put your comment there...
+    *
+    * @param int $i
+    * @param string $change_dir
+    * @param array $list List of files
+    * @return void
+    */
+    protected static function ressetCounter(int &$i, string $change_dir, array &$list)
+    {
+        if ($i >= static::$zip_in) {
+            static::zipList($change_dir, $list);
+            $list = [];
+            $i = 0;
+        }
+    }
+    /**
+    * put your comment there...
+    *
+    */
+    protected static function nonIncrementZip()
+    {
+        $change_dir = explode('/', static::$src_path);
+        $relative_path = array_pop($change_dir);
+        $change_dir = '/'.implode('/', $change_dir);
+        static::zipFolder($change_dir, $relative_path);
+        MyLog::info("Added folder to archive ".static::$name.'.zip', [static::$src_path], 'main');
+    }
+    /**
+    * put your comment there...
+    *
+    * @param string $change_dir
+    * @param string $folder
+    * @return void
+    */
+    protected static function zipFolder($change_dir, $folder)
+    {
+        if (! $folder && ! $change_dir) {
             return;
-        }        
-        MyLog::info("Adding to zip files",array(),'main');
-        $list = implode('" "',$list); 
-        if(file_exists(static::$zipper)){
-            exec('cd '.$cd.' && zip -u '.static::$zipper.' "'.$list.'"' );
-        }else{ 
-            exec('cd '.$cd.' && zip -9 '.static::$zipper.' "'.$list.'"' );
-        }    
+        }
+
+        MyLog::info("Adding to zip folder: ".$folder, [$change_dir], 'main');
+        exec('cd '.$change_dir.' && zip -9 -r '.static::$zipper.' "'.$folder.'"');
+    }
+    /**
+    * put your comment there...
+    *
+    * @param string $change_dir
+    * @param string $list
+    *
+    */
+    protected static function zipList($change_dir, array $list)
+    {
+        if ($list === []) {
+            return;
+        }
+        MyLog::info("Adding to zip files", [], 'main');
+        $list = implode('" "', $list);
+        if (file_exists(static::$zipper)) {
+            exec('cd '.$change_dir.' && zip -u '.static::$zipper.' "'.$list.'"');
+        } else {
+            exec('cd '.$change_dir.' && zip -9 '.static::$zipper.' "'.$list.'"');
+        }
     }
 }
