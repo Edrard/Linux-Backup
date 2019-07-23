@@ -211,9 +211,10 @@
 
                 },
                 togglingStart : function(id,global){
-                    for (i = 1; i < id; i++) {
-                        var type = $('#'+global+'s select[data-id="'+i+'"]:first').data('name')
-                        var selected = $('#'+global+'s select[data-id="'+i+'"]:first option:not([disabled]):first').val()
+                    for (i = 1; i < id; i++) { 
+                        var type = $('#'+global+'s select[data-id="'+i+'"]:first').data('name')   
+                        var selected_type = '#'+global+'s select[data-id="'+i+'"]:first option:not([disabled])';
+                        var selected = $(selected_type+':selected').val() ? $(selected_type+':selected').val() : $(selected_type+':first').val();
                         this.toggling(type,i,global,selected);
                     }        
                 },
@@ -378,8 +379,8 @@
                 }
             }
             var GenerateHtmlStatr = Object.create(GenerateHtml).constructor();
-
-            ToggleForm.togglingStart(1,'backup');
+            
+            ToggleForm.togglingStart(2,'backup');
 
             function is_json(str) {
                 try {
@@ -404,7 +405,6 @@
                             $('.container .card').remove();
                             var config = JSON.parse(text);
                             GenerateHtmlStatr = Object.create(GenerateHtml).constructor(config); 
-                            console.log(GenerateHtmlStatr);
                             ToggleForm.togglingStart(GenerateHtmlStatr.item_id['backup'],'backup');
                         }
                     }
@@ -472,7 +472,6 @@
                 var backup = {};
                 backup['backup'] = generateObject($('#backups-form').serializeArray());
                 backup['config'] = generateObject($('#config-form').serializeArray());
-                backup['mail'] = generateObject($('#mail-form').serializeArray());
                 backup['mysql'] = generateObject($('#mysql-form').serializeArray());
                 backup['log'] = {};
                 backup['log']['mail'] = generateObject($('#mail-form').serializeArray());
