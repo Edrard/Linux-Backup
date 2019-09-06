@@ -9,20 +9,10 @@
         "name": "Edrard",
         "email": "demonand@gmail.com"
     }],
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/Edrard/function.git"
-        },
-        {
-            "type": "git",
-            "url": "https://github.com/Edrard/MyLog.git"
-        }
-    ],
     "require": {
         "php": ">=7.1.0",
-        "edrard/function": "dev-master",
-        "edrard/MyLog": "dev-master",
+        "edrard/function": "1.*",
+        "edrard/mylog": "1.*",
         "league/flysystem": "^1.0",
         "nesbot/carbon": "^1.32",
         "emgag/flysystem-hash": "^1.0",
