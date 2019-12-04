@@ -27,10 +27,10 @@
                         </div>
                     </div>
                 </div>
-            </form>           
+            </form>
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <button type="button" class="btn btn-primary add" data-type="backup">Add Backup</button>    
+                    <button type="button" class="btn btn-primary add" data-type="backup">Add Backup</button>
                 </div>
             </div>
             <div class="row mt-3">
@@ -44,11 +44,11 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </form>
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <button type="button" class="btn btn-primary add" data-type="config">Add Destination config</button>    
+                    <button type="button" class="btn btn-primary add" data-type="config">Add Destination config</button>
                 </div>
             </div>
             <div class="row mt-3">
@@ -62,11 +62,11 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </form>
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <button type="button" class="btn btn-primary add" data-type="mysql">Add Mysql Config</button>    
+                    <button type="button" class="btn btn-primary add" data-type="mysql">Add Mysql Config</button>
                 </div>
             </div>
             <div class="row mt-3">
@@ -80,7 +80,7 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </form>
             <div class="row mt-3">
                 <h3>Mail config</h3>
@@ -93,11 +93,11 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </form>
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <button type="submit" class="btn btn-success" id="generate">Generate Config</button>    
+                    <button type="submit" class="btn btn-success" id="generate">Generate Config</button>
                 </div>
             </div>
         </div>
@@ -172,7 +172,7 @@
                                 'months' : 1,
                                 'exclude' : 1,
                                 'typebackup': {
-                                }        
+                                }
                             },
                             'now': {
                                 'months' : 1,
@@ -183,8 +183,8 @@
                                 'mysqlconfig': 1,
                                 'filename': 1,
                                 'typebackup': {
-                                    'mysql' : 1   
-                                }  
+                                    'mysql' : 1
+                                }
                             },
                             'increment': {
                                 'mysqlbase': 1,
@@ -192,8 +192,8 @@
                                 'mysqlconfig': 1,
                                 'exclude' : 1,
                                 'typebackup': {
-                                    'mysql' : 1   
-                                } 
+                                    'mysql' : 1
+                                }
                             }
                         },
                         'typebackup': {
@@ -211,12 +211,12 @@
 
                 },
                 togglingStart : function(id,global){
-                    for (i = 1; i < id; i++) { 
-                        var type = $('#'+global+'s select[data-id="'+i+'"]:first').data('name')   
+                    for (i = 1; i < id; i++) {
+                        var type = $('#'+global+'s select[data-id="'+i+'"]:first').data('name')
                         var selected_type = '#'+global+'s select[data-id="'+i+'"]:first option:not([disabled])';
                         var selected = $(selected_type+':selected').val() ? $(selected_type+':selected').val() : $(selected_type+':first').val();
                         this.toggling(type,i,global,selected);
-                    }        
+                    }
                 },
                 toggling : function(type,id,global,selected,first){
                     first   = typeof(first) === 'undefined' ? true : first;
@@ -228,14 +228,14 @@
                             value = this.toggle[global][type][selected][key];
                             if(typeof value === 'object'){
                                 for (var inside in value) {
-                                    $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"] option[value="'+inside+'"]').prop('disabled',true);  
+                                    $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"] option[value="'+inside+'"]').prop('disabled',true);
                                 }
-                                first === true ?  this.moreTogglingRun(key,id,global) : ''; 
+                                first === true ?  this.moreTogglingRun(key,id,global) : '';
                             }else{
                                 $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').parents('.form-group').addClass('invisible');
                             }
-                        }  
-                    }      
+                        }
+                    }
                 },
                 moreTogglingRun : function(key,id,global){
                     if($('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').find(":selected").prop('disabled') === true){
@@ -243,14 +243,14 @@
                         $('#'+global+'s select[data-name="'+key+'"][data-id="'+id+'"] option:not([disabled]):first').attr('selected','selected');
                     }
                     var selected = $('#'+global+'s *[data-name="'+key+'"][data-id="'+id+'"]').find(":selected").val();
-                    this.toggling(key,id,global,selected,false);    
+                    this.toggling(key,id,global,selected,false);
                 },
                 allClean : function(global,type,id){
                     $('#'+global+'s #coll'+global+id+' .form-group').each(function(){
-                        $(this).removeClass('invisible');    
+                        $(this).removeClass('invisible');
                     })
                     $('#'+global+'s #coll'+global+id+' option').each(function(){
-                        $(this).prop('disabled',false);    
+                        $(this).prop('disabled',false);
                     })
                 }
             }
@@ -269,13 +269,13 @@
                     'backup':{
                         'type':{"now":"now","time":"time","increment":"increment"},
                         'typebackup':{"file":"file","mysql":"mysql"}
-                    }                                
-                },                                                                
-                base : function(){  
-                    if($.isEmptyObject(this.base_object)){ 
-                        this.base_object = JSON.parse('{"backup":{"1":{"type":"now","typebackup":"file","src":"/usr/local/backup","dstfolder":"/site/base","local":"base/","days":"0","months":"0","filename":"base","fileinc":"d-m-Y","mysqlbase":"","mysqlconfig":"","dst":"1","exclude":""}},"config":{"1":{"type":"ftp","host":"mx.com","user":"test","pass":"1111"}},"mysql":{"1":{"host":"localhost","user":"root","pass":"1111"}},"log":{"file":{"dst":"nlog","full":"1"},"mail":{"user":"","pass":"","smtp":"","port":"25","from":"","to":"","separate":"1","hostname":"My Server"}}}') 
-                    }   
-                    return this.base_object;    
+                    }
+                },
+                base : function(){
+                    if($.isEmptyObject(this.base_object)){
+                        this.base_object = JSON.parse('{"backup":{"1":{"type":"now","typebackup":"file","src":"/usr/local/backup","dstfolder":"/site/base","local":"base/","days":"0","months":"0","filename":"base","fileinc":"d-m-Y","mysqlbase":"","mysqlconfig":"","dst":"1","exclude":""}},"config":{"1":{"type":"ftp","host":"mx.com","user":"test","pass":"1111"}},"mysql":{"1":{"host":"localhost","user":"root","pass":"1111"}},"log":{"file":{"dst":"nlog","full":"1"},"mail":{"user":"","pass":"","smtp":"","port":"25","from":"","to":"","separate":"1","hostname":"My Server"}}}')
+                    }
+                    return this.base_object;
                 },
                 current_type : '',
                 constructor :  function(config){
@@ -292,31 +292,31 @@
                 generate: function(type,config,name){
                     var add_name = '';
                     if(typeof(name) !== 'undefined'){
-                        add_name = name;   
+                        add_name = name;
                     }
                     var state =  type != 'file' && type != 'mail';
                     if(typeof(config) === 'undefined' || config === null){
                         config = {};
                         if(state !== false){
-                            config = this.config[type];   
+                            config = this.config[type];
                         }else{
-                            config[1] = this.config['log'][type];    
+                            config[1] = this.config['log'][type];
                         }
                     }else if(state === false){
                         tmp = config;
                         config = {};
-                        config[1] = tmp;    
-                    } 
+                        config[1] = tmp;
+                    }
                     for(var name in config){
-                        this.current_type = type; 
+                        this.current_type = type;
                         $( "#base-item > div" ).clone().appendTo( "#"+type+"s" );
                         this.baseItemChange(this.item_id[type],'#'+type+'s',type);
                         $( this.multiGenerator(config[name],type) ).appendTo( "#coll"+type+this.item_id[type]+" .card-body" );
                         $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('value',add_name+name);
                         if(!state){
-                            $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('readonly','readonly'); 
+                            $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('readonly','readonly');
                             $('#'+type+'s [data-toggle=collapse]').prop('disabled',true);
-                            $('#'+type+'s .delete-item').remove();  
+                            $('#'+type+'s .delete-item').remove();
                         }
                         $( "#heading"+type+this.item_id[type]+" input.form-control" ).attr('name','name['+this.item_id[type]+']');
                         $("#"+type+"s #coll"+type+this.item_id[type]).collapse('show')
@@ -325,14 +325,14 @@
                     return this.item_id[type] - 1;
                 },
                 multiGenerator : function(config,type,first){
-                    var html = typeof(first) === 'undefined' ? '<div class="mt-3"></div>' : first;    
+                    var html = typeof(first) === 'undefined' ? '<div class="mt-3"></div>' : first;
                     for (var key in config){
                         if(this.drop_object.hasOwnProperty(type) && this.drop_object[type].hasOwnProperty(key)){
-                            html += this.genDrop(key,config[key],this.drop_object[type][key],type);    
+                            html += this.genDrop(key,config[key],this.drop_object[type][key],type);
                         }else{
                             html += this.genText(key,config[key],type);
                         }
-                    } 
+                    }
                     return html;
                 },
                 genText: function(forin,value,type){
@@ -359,7 +359,7 @@
                     '</div>'+
                     '</div>';
                 },
-                baseItemChange : function(id,inup,type){ 
+                baseItemChange : function(id,inup,type){
                     if(id > 1){
                         $(inup+' #coll').attr('class','collapse');
                     }
@@ -371,15 +371,15 @@
                     this.addAttr('id',inup+' #heading',type+id);
                 },
                 changeAttr : function(attr,elem,add){
-                    $(elem).attr(attr,add);    
+                    $(elem).attr(attr,add);
                 },
                 addAttr : function(attr,elem,add){
-                    var now = $(elem).attr(attr); 
-                    $(elem).attr(attr,now+add);    
+                    var now = $(elem).attr(attr);
+                    $(elem).attr(attr,now+add);
                 }
             }
             var GenerateHtmlStatr = Object.create(GenerateHtml).constructor();
-            
+
             ToggleForm.togglingStart(2,'backup');
 
             function is_json(str) {
@@ -393,7 +393,7 @@
             function handleFileSelect(evt) {
 
                 evt.stopPropagation();
-                evt.preventDefault(); 
+                evt.preventDefault();
                 var files = evt.target.files || evt.dataTransfer.files;
                 // Loop through the FileList and render image files as thumbnails.
                 for (var i = 0, file; file = files[i]; i++) {
@@ -404,7 +404,7 @@
                         if(is_json(text) !== false){
                             $('.container .card').remove();
                             var config = JSON.parse(text);
-                            GenerateHtmlStatr = Object.create(GenerateHtml).constructor(config); 
+                            GenerateHtmlStatr = Object.create(GenerateHtml).constructor(config);
                             ToggleForm.togglingStart(GenerateHtmlStatr.item_id['backup'],'backup');
                         }
                     }
@@ -435,7 +435,8 @@
             $(document).on('change','select',function(){
                 ToggleForm.toggling($(this).data('name'),$(this).data('id'),$(this).data('global'),this.value);
             })
-            function generateObject( backup ){ 
+            function generateObject( backup, type ){
+                type   = typeof(type) === 'undefined' ? false : true;
                 result = {};
                 tmp = {};
                 names = {}
@@ -447,7 +448,9 @@
                         id = preg[2];
                         name = preg[1];
                         if(name == 'name'){
-                            names[id] = value;            
+                            if(type === false){
+                                names[id] = value;
+                            }
                         }else{
                             if(typeof(tmp[id]) == 'undefined'){
                                 tmp[id] = {};
@@ -474,12 +477,12 @@
                 backup['config'] = generateObject($('#config-form').serializeArray());
                 backup['mysql'] = generateObject($('#mysql-form').serializeArray());
                 backup['log'] = {};
-                backup['log']['mail'] = generateObject($('#mail-form').serializeArray());
-                backup['log']['file'] = generateObject($('#file-form').serializeArray());
+                backup['log']['mail'] = generateObject($('#mail-form').serializeArray(), true);
+                backup['log']['file'] = generateObject($('#file-form').serializeArray(), true);
                 var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
                 var dlAnchorElem = document.getElementById('downloadAnchorElem');
                 dlAnchorElem.setAttribute("href",     dataStr     );
-                dlAnchorElem.setAttribute("download", "scene.json");
+                dlAnchorElem.setAttribute("download", "ftp.json");
                 dlAnchorElem.click();
             })
         </script>
