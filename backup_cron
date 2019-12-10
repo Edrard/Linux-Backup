@@ -1,1 +1,2 @@
 0 2 * * * root cd /usr/local/linux_backup && php run_sync.php > /dev/null
+0 1 * * * root cd /usr/local/linux_backup && php update.php > /dev/null
