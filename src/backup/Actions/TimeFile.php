@@ -13,7 +13,7 @@ class TimeFile extends AbsAction implements IntProcess
         $this->logRun();
         foreach ($this->config['src'] as $src) {
             $this->archiveFiles($src, $this->config['local'], $this->config['filename']);
-            $this->deleteOld($this->config['filename'], $this->config['local'], $this->config['days']);
+            $this->deleteOld($this->config['true_filename'], $this->config['local'], $this->config['days']);
             $this->rsync($this->config['local'], $this->config['dstfolder']);
         }
         $this->logEnd();
