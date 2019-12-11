@@ -10,7 +10,7 @@
         "email": "demonand@gmail.com"
     }],
     "require": {
-        "php": ">=7.1.0",
+        "php": ">=7.0.0",
         "edrard/function": "1.*",
         "edrard/mylog": "1.*",
         "league/flysystem": "^1.0",
