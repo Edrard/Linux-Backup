@@ -67,7 +67,7 @@
             "user": "test",
             "pass": "1111",
             "type": "ftp"
-        }     
+        }
     },
     "mysql": {
         "1": {
@@ -89,8 +89,7 @@
             "from": "",
             "to": "",
             "separate":"1",
-            "hostname":"My Server" 
+            "hostname":"My Server"
         }
     }
 }
-    
