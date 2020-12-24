@@ -2,7 +2,7 @@
 
 $string = file_get_contents("ftp.json");
 
-exec("git pull");
+exec("git fetch && git merge");
 exec("composer update");
 
 if($string && is_json($string)){
