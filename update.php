@@ -6,9 +6,9 @@ require __DIR__ . '/vendor/autoload.php';
 
 $string = file_get_contents("ftp.json");
 
-exec("gitgit stash save \"Changes I don't want to commit yet\" ");
-exec("gitgit pull");
-exec("gitgit stash pop");
+exec("git stash save \"Changes I don't want to commit yet\" ");
+exec("git pull");
+exec("git stash pop");
 
 exec("composer update");
 
