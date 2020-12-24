@@ -42,17 +42,18 @@ class LogInitiation
     * put your comment there...
     *
     */
-    protected function mailLogSet()
+    public function mailLogSet($shutdown = TRUE)
     {
         $mail = $this->config['mail'];
         if ($mail['user'] && $mail['pass'] && $mail['smtp']) {
             $transport = (new \Swift_SmtpTransport($mail['smtp'], $mail['port']))
-                ->setUsername($mail['user'])
-                ->setPassword($mail['pass'])
+            ->setUsername($mail['user'])
+            ->setPassword($mail['pass'])
             ;
             $this->mailer = new \Swift_Mailer($transport);
-
-            register_shutdown_function([$this, 'mailSend']);
+            if($shutdown !== FALSE){
+                register_shutdown_function([$this, 'mailSend']);
+            }
         }
     }
     /**
@@ -61,7 +62,7 @@ class LogInitiation
     */
     public function mailSend()
     {
-        if ($this->mailer !== false) {
+        if ($this->mailer === false) {
             return;
         }
         $config = MyLog::getLogConfig('main');
@@ -109,9 +110,9 @@ class LogInitiation
     {
         $to = explode(',', $this->config['mail']['to']);
         $message = (new \Swift_Message($subject))
-            ->setFrom([$this->config['mail']['from'] => $this->config['mail']['hostname']])
-            ->setTo($to)
-            ->setBody($text)
+        ->setFrom([$this->config['mail']['from'] => $this->config['mail']['hostname']])
+        ->setTo($to)
+        ->setBody($text)
         ;
         return $this->mailer->send($message);
     }
