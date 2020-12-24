@@ -6,7 +6,10 @@ require __DIR__ . '/vendor/autoload.php';
 
 $string = file_get_contents("ftp.json");
 
-exec("git fetch && git merge");
+exec("gitgit stash save \"Changes I don't want to commit yet\" ");
+exec("gitgit pull");
+exec("gitgit stash pop");
+
 exec("composer update");
 
 if($string && is_json($string)){
