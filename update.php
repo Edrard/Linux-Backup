@@ -23,7 +23,7 @@ if($local_version != $git_version){
     exec("git pull");
 }
 
-exec("COMPOSER_ALLOW_SUPERUSER=1 && composer update && COMPOSER_ALLOW_SUPERUSER=0");
+exec("COMPOSER_ALLOW_SUPERUSER=1 composer update");
 
 if($string && is_json($string)){
     file_write("ftp.json",$string);
