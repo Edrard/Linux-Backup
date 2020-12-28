@@ -24,6 +24,7 @@ if($local_version != $git_version){
 }
 
 exec("COMPOSER_ALLOW_SUPERUSER=1 composer update");
+exec("COMPOSER_ALLOW_SUPERUSER=0");
 
 if($string && is_json($string)){
     file_write("ftp.json",$string);
