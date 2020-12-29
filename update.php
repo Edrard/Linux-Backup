@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-// Test
+
 require __DIR__ . '/vendor/autoload.php';
 
 $string = file_get_contents("ftp.json");
