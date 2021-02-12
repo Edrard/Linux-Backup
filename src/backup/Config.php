@@ -60,7 +60,7 @@ class Config
     {
         foreach($this->config['backup'] as $key => $val){
             if($val['type'] = 'increment'){
-                $this->config[$key]['full_backup_date'] = $value;
+                $this->config['backup'][$key]['full_backup_date'] = $value;
             }
         }
     }
