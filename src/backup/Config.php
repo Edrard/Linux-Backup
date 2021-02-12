@@ -59,7 +59,7 @@ class Config
     public function setIncrementStart($value)
     {
         foreach($this->config['backup'] as $key => $val){
-            if($val['type'] = 'increment'){
+            if($val['type'] == 'increment'){
                 $this->config['backup'][$key]['full_backup_date'] = $value;
             }
         }
