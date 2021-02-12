@@ -9,6 +9,7 @@ define('LOCAL_MAIN_DIR', __DIR__);
 require __DIR__ . '/vendor/autoload.php';
 
 $config = new backup\Config('ftp.json');
+$config['full_backup_date'] = 1;
 new backup\LogInitiation($config);
 $new = new backup\Backup($config);
 $new->run();
