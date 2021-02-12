@@ -56,6 +56,10 @@ class Config
     {
         return isset($this->config[$name]) ? $this->config[$name] : false;
     }
+    public function set($name,$value)
+    {
+        $this->config[$name] = $value;
+    }
     /**
     * put your comment there...
     *
