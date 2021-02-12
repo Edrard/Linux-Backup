@@ -137,7 +137,8 @@ abstract class AbsAction
         $time = 0;
         $type = 'm';
         $exclude = $exclude;
-        if (date('j') != $this->config['full_backup_date']) {
+        $date = isset($this->config['full_backup_date']) ? max(1,(int) $this->config['full_backup_date']) : 1;
+        if (date('j') != $date) {
             $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;
             $type = 'd';
             MyLog::info('Daily Increment Backup start', $this->config, 'main');
