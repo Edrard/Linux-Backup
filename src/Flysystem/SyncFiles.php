@@ -6,6 +6,7 @@ use edrard\Log\MyLog;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\PluginInterface;
+use League\Flysystem\FilesystemException;
 
 class SyncFiles implements PluginInterface
 {
@@ -80,8 +81,10 @@ class SyncFiles implements PluginInterface
             MyLog::info("[Sync] Files copy process starting", [], 'main');
             $this->copyUpdateFiles();
         } catch (\Exception $error) {
-            MyLog::error('[SyncFiles] '.$error->getMessage());
-            die($error->getMessage());
+            MyLog::error('[SyncFiles] '.$error->getMessage(),[],'main');
+            if(!$error instanceof  FilesystemException ){
+                die($error->getMessage());
+            }
         }
         $this->resset();
     }
