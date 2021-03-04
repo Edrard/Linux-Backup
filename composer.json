@@ -11,8 +11,8 @@
     }],
     "require": {
         "php": ">=7.0.0",
-        "edrard/function": "1.*",
-        "edrard/mylog": "1.*",
+        "edrard/function": "dev-master",
+        "edrard/mylog": "dev-master",
         "league/flysystem": "^1.0",
         "nesbot/carbon": "^1.32",
         "emgag/flysystem-hash": "^1.0",
