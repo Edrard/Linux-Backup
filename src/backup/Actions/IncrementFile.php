@@ -14,8 +14,9 @@ class IncrementFile extends AbsAction implements IntProcess
     {
         $this->logRun();
         foreach ($this->config['src'] as $src) {
-            $type = $this->increment($this->config['filename'], $src, $this->config['local'], $this->config['exclude']);
+            list($type,$time) =  $this->incrementTypeAndTime();
             $this->monthClean($type);
+            $this->increment($this->config['filename'], $src, $this->config['local'], $this->config['exclude'],$type,$time);
             $this->rsync($this->config['local'], $this->config['dstfolder']);
             $this->logEnd();
         }

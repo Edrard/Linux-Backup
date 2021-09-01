@@ -126,17 +126,11 @@ abstract class AbsAction
     }
     /**
     * put your comment there...
-    *
-    * @param string $filename
-    * @param string $src
-    * @param string $local
-    * @param array $exclude
     */
-    protected function increment($filename, $src, $local, $exclude)
+    protected function incrementTypeAndTime()
     {
         $time = 0;
         $type = 'm';
-        $exclude = $exclude;
         $date = isset($this->config['full_backup_date']) ? max(1,(int) $this->config['full_backup_date']) : 1;
         if (date('j') != $date) {
             $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;
@@ -145,8 +139,11 @@ abstract class AbsAction
         } else {
             MyLog::info('Monthly Full Backup start', $this->config, 'main');
         }
+        return array($type,$time);
+    }
+    protected function increment($filename, $src, $local, $exclude,$type,$time)
+    {
         $this->archiveFiles($src, $local, $filename.'-'.$type, $time);
-        return $type;
     }
     /**
     * put your comment there...
