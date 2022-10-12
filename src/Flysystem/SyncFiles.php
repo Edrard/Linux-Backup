@@ -175,6 +175,7 @@ class SyncFiles implements PluginInterface
     {
         foreach ($this->dir_create as $creat_dir) {
             $dir = '/'.trim($this->dst_path, '/').$creat_dir['path'].'/';
+            //$dir = str_replace('.','rp_dot_',$dir);
             $response = $this->filesystem->createDir($dir);
             $response ? MyLog::info("[Sync] Folder created", [$dir], 'main')
             : MyLog::error("[Sync] Can`t create folder:", [$dir,$response], 'main');

@@ -9,11 +9,33 @@
         "name": "Edrard",
         "email": "demonand@gmail.com"
     }],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/function.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/MyLog.git"
+        },
+        {
+    "type": "package",
+    "package": {
+        "version": "dev-1.x",
+        "name": "Edrard/flysystem",
+        "source": {
+            "url": "https://github.com/Edrard/flysystem.git",
+            "type": "git",
+            "reference": "1.x"
+        }
+    }
+        }
+    ],
     "require": {
         "php": ">=7.0.0",
         "edrard/function": "dev-master",
         "edrard/mylog": "dev-master",
-        "league/flysystem": "^1.0",
+        "edrard/flysystem": "dev-1.x",
         "nesbot/carbon": "^1.32",
         "emgag/flysystem-hash": "^1.0",
         "ifsnop/mysqldump-php": "^2.6",
