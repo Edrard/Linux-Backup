@@ -23,7 +23,7 @@ if($local_version != $git_version){
     exec("git pull");
 }
 
-exec("COMPOSER_ALLOW_SUPERUSER=1 composer update");
+exec("COMPOSER_ALLOW_SUPERUSER=1 composer update --no-interaction");
 exec("COMPOSER_ALLOW_SUPERUSER=0");
 
 if($string && is_json($string)){
