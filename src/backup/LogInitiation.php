@@ -50,6 +50,7 @@ class LogInitiation
             ->setUsername($mail['user'])
             ->setPassword($mail['pass'])
             ;
+            MyLog::info("Setting mail", [], 'main');
             $this->mailer = new \Swift_Mailer($transport);
             if($shutdown !== FALSE){
                 register_shutdown_function([$this, 'mailSend']);
@@ -72,11 +73,13 @@ class LogInitiation
             $type = $this->getLogType($log, $config);
             $read .= $type."\n\n".file_get_contents($log);
             if ($this->config['mail']['separate'] == 1) {
+                MyLog::info("Sending mail separated", $this->config['mail'], 'main');
                 $this->sendMailLog($read, '['.$type.' '.$this->config['mail']['hostname'].']');
                 $read = '';
             }
         }
         if ($this->config['mail']['separate'] != 1) {
+            MyLog::info("Sending mail combined", $this->config['mail'], 'main');
             $this->sendMailLog($read, '['.$this->config['mail']['hostname'].']');
         }
     }
@@ -114,6 +117,8 @@ class LogInitiation
         ->setTo($to)
         ->setBody($text)
         ;
-        return $this->mailer->send($message);
+        $return = $this->mailer->send($message);
+        MyLog::info("Mail sending result", [$return], 'main');
+        return $return;
     }
 }
