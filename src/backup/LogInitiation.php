@@ -8,6 +8,7 @@ class LogInitiation
 {
     protected $config = [];
     protected $mailer = false;
+    protected $ports = [ 587 => 'tls', 465 => 'ssl' ];
 
     /**
     * put your comment there...
@@ -46,7 +47,7 @@ class LogInitiation
     {
         $mail = $this->config['mail'];
         if ($mail['user'] && $mail['pass'] && $mail['smtp']) {
-            $transport = (new \Swift_SmtpTransport($mail['smtp'], $mail['port']))
+            $transport = (new \Swift_SmtpTransport($mail['smtp'], $mail['port'], $this->getMailEncryption($mail['port'])))
             ->setUsername($mail['user'])
             ->setPassword($mail['pass'])
             ;
@@ -56,6 +57,12 @@ class LogInitiation
                 register_shutdown_function([$this, 'mailSend']);
             }
         }
+    }
+    protected function getMailEncryption($port){
+        if(isset($this->ports[$port])){
+            return $this->ports[$port];
+        }
+        return null;
     }
     /**
     * put your comment there...
