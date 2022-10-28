@@ -2,6 +2,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+$composer_run = '';
+if(isset($argv[1])){
+    $composer_run = ' '.$argv[1];
+}
+
 require __DIR__ . '/vendor/autoload.php';
 
 $string = file_get_contents("ftp.json");
@@ -23,7 +28,7 @@ if($local_version != $git_version){
     exec("git pull");
 }
 
-exec("COMPOSER_ALLOW_SUPERUSER=1 composer update --no-interaction");
+exec("COMPOSER_ALLOW_SUPERUSER=1 bash comp.sh".$composer_run);
 exec("COMPOSER_ALLOW_SUPERUSER=0");
 
 if($string && is_json($string)){
