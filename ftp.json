@@ -57,6 +57,14 @@
         "typebackup": "mysql",
         "exclude": "",
         "mysqlbase": "amorq",
+        "mysqlbase_table_setup": {
+                "amorq": {
+                        "no-data":{
+                            "config":"",
+                            "lang":""
+                        }
+                    }
+        },
         "mysqlconfig": "1",
         "dst": "1"
     }

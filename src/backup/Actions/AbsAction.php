@@ -166,13 +166,16 @@ abstract class AbsAction
     * @param string $local
     * @param array $mysqlbase
     */
-    protected function mysqlDump($localhost, $user, $pass, $filename, $local, array $mysqlbase)
+    protected function mysqlDump($localhost, $user, $pass, $filename, $local, array $mysqlbase, array $setup)
     {
         try {
             $files = [];
             foreach ($mysqlbase as $base) {
                 $files[] = '/'.trim($local, '/').'/'.$base.'.sql';
-                $dump = new IMysqldump\Mysqldump('mysql:host='.$localhost.';dbname='.$base, $user, $pass, ['lock-tables' => false]);
+                $dumpSettingsDefault = [];
+                $dumpSettingsDefault = $this->_checkNoDataTables($dumpSettingsDefault,$base,$setup);
+                $dumpSettingsDefault['lock-tables'] = false;
+                $dump = new IMysqldump\Mysqldump('mysql:host='.$localhost.';dbname='.$base, $user, $pass, $dumpSettingsDefault);
                 $dump->start('/'.trim($local, '/').'/'.$base.'.sql');
             }
             ZipFiles::zip($filename, $local, $files);
@@ -182,6 +185,13 @@ abstract class AbsAction
         } catch (\Exception $error) {
             echo '[DumpMySQL] ' . $error->getMessage();
         }
+    }
+    protected function _checkNoDataTables($dumpSettingsDefault = array(), $base,$setup){
+        if(isset($setup[$base]['no-data'])){
+            $dumpSettingsDefault['no-data'] = array_copy_key_to_value($setup[$base]['no-data']);
+            MyLog::info('Exclude Mysql tables from base '.$base, $setup[$base]['no-data'], 'main');
+        }
+        return $dumpSettingsDefault;
     }
     /**
     * put your comment there...
