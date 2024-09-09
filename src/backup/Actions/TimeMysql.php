@@ -11,7 +11,7 @@ class TimeMysql extends AbsAction implements IntProcess
     public function run()
     {
         $this->logRun();
-        if(!isset($this->config['mysqlbase_table_setup']) || $this->config['mysqlbase_table_setup'] != array()){
+        if(!isset($this->config['mysqlbase_table_setup']) || $this->config['mysqlbase_table_setup'] == array() || !$this->config['mysqlbase_table_setup']){
             $this->config['mysqlbase_table_setup'] = [];
         }
         if (in_array('+', $this->config['mysqlbase'])) {
