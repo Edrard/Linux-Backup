@@ -31,7 +31,7 @@
         "edrard/mylog": "dev-master",
         "league/flysystem": "1.x-dev",
         "emgag/flysystem-hash": "^1.0",
-        "nesbot/carbon": "^1.32",
+        "nesbot/carbon": "2.*",
         "ifsnop/mysqldump-php": "^2.6",
         "swiftmailer/swiftmailer": "^6.0"
     },
