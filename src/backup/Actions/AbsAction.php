@@ -186,7 +186,7 @@ abstract class AbsAction
             echo '[DumpMySQL] ' . $error->getMessage();
         }
     }
-    protected function _checkNoDataTables($dumpSettingsDefault = array(), $base,$setup){
+    protected function _checkNoDataTables($dumpSettingsDefault, $base,$setup){
         if(isset($setup[$base]['no-data'])){
             $dumpSettingsDefault['no-data'] = array_copy_key_to_value($setup[$base]['no-data']);
             MyLog::info('Exclude Mysql tables from base '.$base, $setup[$base]['no-data'], 'main');

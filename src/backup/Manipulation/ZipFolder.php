@@ -28,7 +28,7 @@ class ZipFolder
     public static function zip(
         Filesystem $file,
         $src_path,
-        $where = null,
+        $where,
         $increment,
         $name
     ) {
