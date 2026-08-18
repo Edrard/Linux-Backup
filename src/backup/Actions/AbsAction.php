@@ -45,7 +45,7 @@ abstract class AbsAction
     */
     public function classGet()
     {
-        $class = explode('\\', self::class);
+        $class = explode('\\', static::class);
         $this->class =  array_pop($class);
     }
     /**
@@ -62,7 +62,7 @@ abstract class AbsAction
     */
     public function getConfig()
     {
-        return $this-config;
+        return $this->config;
     }
     /**
     * put your comment there...
@@ -131,7 +131,7 @@ abstract class AbsAction
     {
         $time = 0;
         $type = 'm';
-        $date = isset($this->config['full_backup_date']) ? max(1,(int) $this->config['full_backup_date']) : 1;
+        $date = isset($this->config['full_backup_date']) ? min(28, max(1,(int) $this->config['full_backup_date'])) : 1;
         if (date('j') != $date) {
             $time = Carbon::now()->subDay()->subSeconds(5)->timestamp;
             $type = 'd';
@@ -183,7 +183,7 @@ abstract class AbsAction
                 $this->local->delete($file);
             }
         } catch (\Exception $error) {
-            echo '[DumpMySQL] ' . $error->getMessage();
+            MyLog::error('[DumpMySQL] ' . $error->getMessage(), [], 'main');
         }
     }
     protected function _checkNoDataTables($dumpSettingsDefault, $base,$setup){

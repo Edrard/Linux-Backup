@@ -14,12 +14,67 @@ class Config
     */
     public function __construct($file)
     {
+        if (! is_readable($file)) {
+            throw new \InvalidArgumentException('Config file is not readable: '.$file);
+        }
         $this->config =  json_decode(file_get_contents($file), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('Config JSON error: '.json_last_error_msg());
+        }
+        $this->normalize();
         $this->fixBaseDirectory();
         $this->exclude();
         $this->filename();
         $this->mysql();
         $this->multiSrc();
+    }
+    /**
+    * Normalize optional config keys before derived values are built.
+    */
+    protected function normalize()
+    {
+        if (! is_array($this->config) || ! isset($this->config['backup']) || ! is_array($this->config['backup'])) {
+            throw new \InvalidArgumentException('Config must contain backup section');
+        }
+        $this->config['config'] = isset($this->config['config']) && is_array($this->config['config']) ? $this->config['config'] : [];
+        $this->config['mysql'] = isset($this->config['mysql']) && is_array($this->config['mysql']) ? $this->config['mysql'] : [];
+        $this->config['log'] = isset($this->config['log']) && is_array($this->config['log']) ? $this->config['log'] : [];
+        $this->config['log']['file'] = isset($this->config['log']['file']) && is_array($this->config['log']['file']) ? $this->config['log']['file'] : [];
+        $this->config['log']['mail'] = isset($this->config['log']['mail']) && is_array($this->config['log']['mail']) ? $this->config['log']['mail'] : [];
+        $this->config['log']['file'] = array_merge(['dst' => 'nlog', 'full' => ''], $this->config['log']['file']);
+        $this->config['log']['mail'] = array_merge([
+            'user' => '',
+            'pass' => '',
+            'smtp' => '',
+            'port' => '25',
+            'from' => '',
+            'to' => '',
+            'separate' => '',
+            'hostname' => '',
+        ], $this->config['log']['mail']);
+        $defaults = [
+            'src' => '',
+            'dstfolder' => '',
+            'local' => '',
+            'type' => 'now',
+            'days' => '0',
+            'months' => '0',
+            'full_backup_date' => '1',
+            'filename' => '',
+            'fileinc' => '',
+            'typebackup' => 'file',
+            'exclude' => '',
+            'mysqlbase' => '',
+            'mysqlbase_table_setup' => [],
+            'mysqlconfig' => '',
+            'dst' => '',
+        ];
+        foreach ($this->config['backup'] as $key => $back) {
+            if (! is_array($back)) {
+                throw new \InvalidArgumentException('Backup config '.$key.' must be an object');
+            }
+            $this->config['backup'][$key] = array_merge($defaults, $back);
+        }
     }
     /**
     * put your comment there...
@@ -30,6 +85,8 @@ class Config
         foreach ($this->config['backup'] as $key => $back) {
             if ($back['src']) {
                 $this->multiSrcToArray($key, $back['src']);
+            } else {
+                $this->config['backup'][$key]['src'] = [];
             }
         }
     }
@@ -41,11 +98,9 @@ class Config
     */
     protected function multiSrcToArray($key, $src)
     {
-        $this->config['backup'][$key]['src'] = explode(',', trim($src, ','));
-        if (! is_array($this->config['backup'][$key]['src']) || ($this->config['backup'][$key]['src']) === []) {
-            $this->config['backup'][$key]['src'] = [];
-            $this->config['backup'][$key]['src'][] =  $src;
-        }
+        $this->config['backup'][$key]['src'] = array_values(array_filter(array_map('trim', explode(',', trim($src, ','))), function ($path) {
+            return $path !== '';
+        }));
     }
     /**
     * put your comment there...
@@ -71,6 +126,10 @@ class Config
     protected function fixBaseDirectory()
     {
         foreach ($this->config['backup'] as $key => $back) {
+            if ($back['local'] === '') {
+                $this->config['backup'][$key]['local'] = LOCAL_MAIN_DIR;
+                continue;
+            }
             $this->config['backup'][$key]['local'] = $back['local'][0] === '/' ? $back['local'] : LOCAL_MAIN_DIR.'/'.$back['local'];
         }
     }
@@ -81,8 +140,10 @@ class Config
     protected function filename()
     {
         foreach ($this->config['backup'] as $key => $back) {
-            if ($back['filename'] && $back['fileinc']) {
+            if ($back['filename']) {
                 $this->config['backup'][$key]['true_filename'] = $back['filename'];
+            }
+            if ($back['filename'] && $back['fileinc']) {
                 $this->config['backup'][$key]['filename'] .= '-'.date($back['fileinc']);
             }
         }

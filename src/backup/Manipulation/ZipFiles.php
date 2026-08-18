@@ -46,12 +46,20 @@ class ZipFiles
             $relativePath = pathinfo($path)['basename'];
             $change_dir = str_replace($relativePath, '', $path);
             if (file_exists(static::$zipper)) {
-                exec('cd '.$change_dir.' && zip -u '.static::$zipper.' "'.$relativePath.'"');
+                static::runZipCommand($change_dir, ['-u', static::$zipper, $relativePath]);
             } else {
-                exec('cd '.$change_dir.' && zip -9 '.static::$zipper.' "'.$relativePath.'"');
+                static::runZipCommand($change_dir, ['-9', static::$zipper, $relativePath]);
             }
             MyLog::info("Added file to archive ".static::$name.'.zip', [$path], 'main');
         }
         MyLog::info("Files zipped", [], 'main');
+    }
+    /**
+    * Run zip from the source directory with escaped shell arguments.
+    */
+    protected static function runZipCommand($change_dir, array $arguments)
+    {
+        $arguments = array_map('escapeshellarg', $arguments);
+        exec('cd '.escapeshellarg($change_dir).' && zip '.implode(' ', $arguments));
     }
 }

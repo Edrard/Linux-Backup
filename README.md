@@ -160,7 +160,7 @@ Each item under `backup` describes one backup job.
 
 `months` is the number of months to keep full monthly archives for `increment` backups.
 
-`full_backup_date` is used only by `increment` backups. It sets the day of the month when the full archive is created. Use `1` for the first day of the month. Values from `1` to `28` are safest because they exist in every month. If the key is missing, the code defaults to `1`.
+`full_backup_date` is used only by `increment` backups. It sets the day of the month when the full archive is created. Use `1` for the first day of the month. The code keeps this value in the `1`-`28` range because those days exist in every month. If the key is missing, the code defaults to `1`.
 
 `filename` is the base archive filename.
 

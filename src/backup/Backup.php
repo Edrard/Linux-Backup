@@ -37,6 +37,9 @@ class Backup
             $ctype = (strtolower($elem['typebackup']) !== 'mysql' ? ucfirst(strtolower($elem['type'])) : 'Time').ucfirst(strtolower($elem['typebackup']));
             $dst = $this->distination($this->config->returnConfig($elem['dst']), $key, $elem['dst']);
             $class = '\backup\Actions\\'.$ctype;
+            if (! class_exists($class)) {
+                throw new NoInicializationException('No action class for element with key = '.$key.' and type = '.$ctype, 'error');
+            }
             $this->run[] = new $class($elem, $dst, $local, $this->config->returnMysqlConfig($elem['mysqlconfig']));
             MyLog::info('Initialization backup process - '.$ctype.' with config', $elem, 'main');
             $this->initial = $this->initial === false ? true : true;
@@ -81,11 +84,14 @@ class Backup
     */
     protected function distination(array $config, $key, $id)
     {
+        if ($config === []) {
+            throw new NoDistinationException('No destination for element with key = '.$key, 'error');
+        }
         if (! isset($this->dst[$config['type']][$id]) || ! $this->dst[$config['type']][$id]) {
-            if ($config === []) {
-                throw new NoDistinationException('No destination for element with key = '.$key, 'error');
-            }
             $function = $config['type'].'Adapter';
+            if (! method_exists($this, $function)) {
+                throw new NoDistinationException('No destination adapter for element with key = '.$key.' and type = '.$config['type'], 'error');
+            }
             $filesystem = new Filesystem($this->{$function}($config));
             MyLog::info('Setted config', $config, 'main');
             $filesystem->addPlugin(new SyncFiles());

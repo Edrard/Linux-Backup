@@ -8,7 +8,11 @@ define('LOCAL_MAIN_DIR', __DIR__);
 
 require __DIR__ . '/vendor/autoload.php';
 
-$config = new backup\Config('ftp.json');
-new backup\LogInitiation($config);
-$new = new backup\Backup($config);
-$new->run();
+try {
+    $config = new backup\Config('ftp.json');
+    new backup\LogInitiation($config);
+    $new = new backup\Backup($config);
+    $new->run();
+} catch (\Throwable $error) {
+    die('[Backup] '.$error->getMessage());
+}

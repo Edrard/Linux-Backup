@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 
 $composer_run = '';
 if(isset($argv[1])){
-    $composer_run = ' '.$argv[1];
+    $composer_run = ' '.escapeshellarg($argv[1]);
 }
 
 require __DIR__ . '/vendor/autoload.php';
@@ -23,9 +23,13 @@ if(isset($output_array[0])){
 }
 $local_version = exec('git rev-parse HEAD');
 if($local_version != $git_version){
-    exec("git fetch --all");
-    exec("git reset --hard origin/master");
-    exec("git pull");
+    if(is_safe_to_update()){
+        exec("git fetch --all");
+        exec("git reset --hard origin/master");
+        exec("git pull --ff-only");
+    }else{
+        echo "Skip update: local changes detected\n";
+    }
 }
 
 exec("COMPOSER_ALLOW_SUPERUSER=1 bash comp.sh".$composer_run);
@@ -35,10 +39,20 @@ if($string && is_json($string)){
     file_write("ftp.json",$string);
 }
 
-exec('chown '.$owner_user.':'.$owner_group.' * -R');
+exec('chown -R '.escapeshellarg($owner_user.':'.$owner_group).' .');
 
 function file_write($file,$string){
     $myfile = fopen($file, "w") or die("Unable to open file!");
     fwrite($myfile, $string);
     fclose($myfile);
+}
+
+function is_safe_to_update(){
+    exec('git status --porcelain --untracked-files=no', $output);
+    foreach($output as $line){
+        if(trim(substr($line, 3)) != 'ftp.json'){
+            return false;
+        }
+    }
+    return true;
 }

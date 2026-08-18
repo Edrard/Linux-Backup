@@ -130,7 +130,7 @@ class ZipFolder
         }
 
         MyLog::info("Adding to zip folder: ".$folder, [$change_dir], 'main');
-        exec('cd '.$change_dir.' && zip -9 -r '.static::$zipper.' "'.$folder.'"');
+        static::runZipCommand($change_dir, ['-9', '-r', static::$zipper, $folder]);
     }
     /**
     * put your comment there...
@@ -145,11 +145,18 @@ class ZipFolder
             return;
         }
         MyLog::info("Adding to zip files", [], 'main');
-        $list = implode('" "', $list);
         if (file_exists(static::$zipper)) {
-            exec('cd '.$change_dir.' && zip -u '.static::$zipper.' "'.$list.'"');
+            static::runZipCommand($change_dir, array_merge(['-u', static::$zipper], $list));
         } else {
-            exec('cd '.$change_dir.' && zip -9 '.static::$zipper.' "'.$list.'"');
+            static::runZipCommand($change_dir, array_merge(['-9', static::$zipper], $list));
         }
+    }
+    /**
+    * Run zip from the source directory with escaped shell arguments.
+    */
+    protected static function runZipCommand($change_dir, array $arguments)
+    {
+        $arguments = array_map('escapeshellarg', $arguments);
+        exec('cd '.escapeshellarg($change_dir).' && zip '.implode(' ', $arguments));
     }
 }
