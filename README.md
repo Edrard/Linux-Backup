@@ -93,7 +93,8 @@ Open it in a browser, upload an existing `ftp.json` if needed, then generate the
       "fileinc": "d-m-Y",
       "typebackup": "mysql",
       "exclude": "",
-      "mysqlbase": "db_name",
+      "mysqlbase": "+",
+      "mysqlbase_exclude": "otrs",
       "mysqlbase_table_setup": {
         "db_name": {
           "no-data": {
@@ -171,6 +172,8 @@ Each item under `backup` describes one backup job.
 `exclude` is a space-separated list of paths to exclude from archive/sync operations.
 
 `mysqlbase` is a space-separated list of database names. Use `+` to dump all available databases.
+
+`mysqlbase_exclude` is a space-separated list of database names to skip. It is useful with `"mysqlbase": "+"`, for example `"mysqlbase_exclude": "otrs"` dumps all databases except `otrs`.
 
 `mysqlbase_table_setup` can mark tables that should be dumped without data. In the example above, `config` and `lang` table structures are included without rows.
 

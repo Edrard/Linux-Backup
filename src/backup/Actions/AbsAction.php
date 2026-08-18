@@ -196,6 +196,20 @@ abstract class AbsAction
     /**
     * put your comment there...
     *
+    * @param array $bases
+    * @param array $exclude
+    */
+    protected function excludeMysqlBases(array $bases, array $exclude)
+    {
+        if ($exclude === []) {
+            return $bases;
+        }
+        MyLog::info('Exclude Mysql bases', $exclude, 'main');
+        return array_values(array_diff($bases, $exclude));
+    }
+    /**
+    * put your comment there...
+    *
     * @param string $localhost
     * @param string $user
     * @param string $pass

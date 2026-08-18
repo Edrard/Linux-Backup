@@ -65,6 +65,7 @@ class Config
             'typebackup' => 'file',
             'exclude' => '',
             'mysqlbase' => '',
+            'mysqlbase_exclude' => '',
             'mysqlbase_table_setup' => [],
             'mysqlconfig' => '',
             'dst' => '',
@@ -186,7 +187,22 @@ class Config
                 $final = explode(' ', trim($back['mysqlbase']));
             }
             $this->config['backup'][$key]['mysqlbase'] = $final;
+            $this->config['backup'][$key]['mysqlbase_exclude'] = $this->spaceSeparatedList($back['mysqlbase_exclude']);
         }
+    }
+    /**
+    * put your comment there...
+    *
+    * @param string $value
+    */
+    protected function spaceSeparatedList($value)
+    {
+        if (! trim($value)) {
+            return [];
+        }
+        return array_values(array_filter(array_map('trim', explode(' ', trim($value))), function ($item) {
+            return $item !== '';
+        }));
     }
     /**
     * put your comment there...
