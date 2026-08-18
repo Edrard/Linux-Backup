@@ -131,6 +131,7 @@
                     'filename_backup' : 'Имя файла',
                     'fileinc_backup'  : 'Добавка к имени файла(в формате date() функции)',
                     'months_backup'  : 'Количество месяцев(для инкрементного)',
+                    'full_backup_date_backup'  : 'День месяца для полного инкрементного бекапа',
                     'days_backup'     : 'Количество дней(для временного)',
                     'mysqlbase_backup': 'Список MySQL баз. Если + то все',
                     'mysqlconfig_backup' : 'Конфиг доступа MySQL',
@@ -171,12 +172,14 @@
                         'type':{
                             'time':{
                                 'months' : 1,
+                                'full_backup_date' : 1,
                                 'exclude' : 1,
                                 'typebackup': {
                                 }
                             },
                             'now': {
                                 'months' : 1,
+                                'full_backup_date' : 1,
                                 'fileinc' : 1,
                                 'exclude' : 1,
                                 'days': 1,
@@ -205,6 +208,7 @@
                             },
                             'mysql': {
                                 'src': 1,
+                                'full_backup_date' : 1,
                                 'type': {}
                             }
                         }
@@ -274,7 +278,7 @@
                 },
                 base : function(){
                     if($.isEmptyObject(this.base_object)){
-                        this.base_object = JSON.parse('{"backup":{"1":{"type":"now","typebackup":"file","src":"/usr/local/backup","dstfolder":"/site/base","local":"base/","days":"0","months":"0","filename":"base","fileinc":"d-m-Y","mysqlbase":"","mysqlconfig":"","dst":"1","exclude":""}},"config":{"1":{"type":"ftp","host":"mx.com","user":"test","pass":"1111"}},"mysql":{"1":{"host":"localhost","user":"root","pass":"1111"}},"log":{"file":{"dst":"nlog","full":"1"},"mail":{"user":"","pass":"","smtp":"","port":"25","from":"","to":"","separate":"1","hostname":"My Server"}}}')
+                        this.base_object = JSON.parse('{"backup":{"1":{"type":"now","typebackup":"file","src":"/usr/local/backup","dstfolder":"/site/base","local":"base/","days":"0","months":"0","full_backup_date":"1","filename":"base","fileinc":"d-m-Y","mysqlbase":"","mysqlconfig":"","dst":"1","exclude":""}},"config":{"1":{"type":"ftp","host":"mx.com","user":"test","pass":"1111"}},"mysql":{"1":{"host":"localhost","user":"root","pass":"1111"}},"log":{"file":{"dst":"nlog","full":"1"},"mail":{"user":"","pass":"","smtp":"","port":"25","from":"","to":"","separate":"1","hostname":"My Server"}}}')
                     }
                     return this.base_object;
                 },

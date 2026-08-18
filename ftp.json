@@ -22,6 +22,7 @@
         "type": "increment",
         "days": "1",
         "months": "1",
+        "full_backup_date": "1",
         "filename": "otrs",
         "fileinc": "d-m-Y",
         "typebackup": "file",
