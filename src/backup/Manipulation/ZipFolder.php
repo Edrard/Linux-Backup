@@ -15,6 +15,7 @@ class ZipFolder
     protected static $name;
     protected static $zipper;
     protected static $zip_in = 100;
+    protected static $exclude = [];
 
     /**
     * put your comment there...
@@ -23,19 +24,22 @@ class ZipFolder
     * @param string $src_path Source path
     * @param string $where Local path
     * @param string $increment Increment time
-    * @param string $name file name
-    */
+     * @param string $name file name
+     * @param array $exclude
+     */
     public static function zip(
         Filesystem $file,
         $src_path,
         $where,
         $increment,
-        $name
+        $name,
+        array $exclude = []
     ) {
         static::$src_path = trim($src_path, '/');
         static::$where = $where === null ? '' : trim($where, '/');
         static::$increment = $increment;
         static::$name = $name;
+        static::$exclude = $exclude;
         static::$filesystem = $file;
         static::$zipper = '/'.static::$where.'/'.static::$name.'.zip';
         //dd('/'.static::$where.'/'.static::$name.'.zip');
@@ -47,7 +51,7 @@ class ZipFolder
             static::zipRun();
         } catch (Base $error) {
             MyLog::error('[ZipFolder] '.$error->getMessage());
-            die($error->getMessage());
+            throw $error;
         }
     }
     /**
@@ -75,6 +79,9 @@ class ZipFolder
         foreach ($contents as $con) {
             if ($con['timestamp'] > static::$increment && $con['type'] != 'dir') {
                 $relative_path = substr('/'.$con['path'], strlen('/'.static::$src_path) + 1);
+                if (static::isExcluded($relative_path)) {
+                    continue;
+                }
                 $change_dir = str_replace($relative_path, '', '/'.$con['path']);
                 $list[] = $relative_path;
                 $i++;
@@ -130,7 +137,12 @@ class ZipFolder
         }
 
         MyLog::info("Adding to zip folder: ".$folder, [$change_dir], 'main');
-        static::runZipCommand($change_dir, ['-9', '-r', static::$zipper, $folder]);
+        $arguments = ['-9', '-r', static::$zipper, $folder];
+        foreach (static::zipExcludePatterns($folder) as $pattern) {
+            $arguments[] = '-x';
+            $arguments[] = $pattern;
+        }
+        static::runZipCommand($change_dir, $arguments);
     }
     /**
     * put your comment there...
@@ -157,6 +169,40 @@ class ZipFolder
     protected static function runZipCommand($change_dir, array $arguments)
     {
         $arguments = array_map('escapeshellarg', $arguments);
-        exec('cd '.escapeshellarg($change_dir).' && zip '.implode(' ', $arguments));
+        exec('cd '.escapeshellarg($change_dir).' && zip '.implode(' ', $arguments), $output, $code);
+        if ($code !== 0) {
+            throw new Base('Zip command failed with code '.$code, 'error', $code);
+        }
+    }
+    /**
+    * Check if a file path is inside an excluded folder.
+    */
+    protected static function isExcluded($path)
+    {
+        $path = trim($path, '/');
+        foreach (static::$exclude as $exclude) {
+            $exclude = trim($exclude, '/');
+            if ($exclude !== '' && ($path === $exclude || strpos($path, $exclude.'/') === 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+    * Build zip exclude patterns for folders relative to the archived folder.
+    */
+    protected static function zipExcludePatterns($folder)
+    {
+        $patterns = [];
+        $folder = trim($folder, '/');
+        foreach (static::$exclude as $exclude) {
+            $exclude = trim($exclude, '/');
+            if ($exclude === '') {
+                continue;
+            }
+            $patterns[] = $folder.'/'.$exclude;
+            $patterns[] = $folder.'/'.$exclude.'/*';
+        }
+        return $patterns;
     }
 }

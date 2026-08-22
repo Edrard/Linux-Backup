@@ -33,7 +33,7 @@ class ZipFiles
             static::addFiles();
         } catch (Base $error) {
             MyLog::error('[ZipFiles] '.$error->getMessage());
-            die($error->getMessage());
+            throw $error;
         }
     }
     /**
@@ -60,6 +60,9 @@ class ZipFiles
     protected static function runZipCommand($change_dir, array $arguments)
     {
         $arguments = array_map('escapeshellarg', $arguments);
-        exec('cd '.escapeshellarg($change_dir).' && zip '.implode(' ', $arguments));
+        exec('cd '.escapeshellarg($change_dir).' && zip '.implode(' ', $arguments), $output, $code);
+        if ($code !== 0) {
+            throw new Base('Zip command failed with code '.$code, 'error', $code);
+        }
     }
 }

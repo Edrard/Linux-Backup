@@ -51,14 +51,8 @@ class Backup
     */
     public function run()
     {
-        try {
-            $this->initial();
-            $this->startBackup();
-        } catch (NoInicializationException $error) {
-            die('[NoInicializationException] '.$error->getMessage());
-        } catch (NoDistinationException $error) {
-            die('[NoDistinationException] '.$error->getMessage());
-        }
+        $this->initial();
+        $this->startBackup();
     }
     /**
     * put your comment there...

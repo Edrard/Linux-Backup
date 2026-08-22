@@ -34,7 +34,49 @@ Run a backup manually:
 php run_sync.php
 ```
 
+Check the configuration without running backup actions:
+
+```bash
+php run_sync.php --check-config
+```
+
 The repository also includes `backup_cron`. Copy or adapt its jobs into `/etc/cron.d/` when the configuration is ready.
+
+## Lock File
+
+`run_sync.php` uses `linux_backup.lock` in the project directory to prevent overlapping runs. If a previous backup is still running, the next process exits with code `2` without starting another backup.
+
+The lock is released automatically when the process finishes. If PHP crashes hard, the lock file can remain on disk, but the OS lock is released with the process, so the next run can lock the file again.
+
+## Exit Codes
+
+`run_sync.php` exits with a non-zero code when something fails:
+
+```text
+0 success
+1 config or initialization error
+2 backup runtime error
+3 sync error
+```
+
+This is useful for cron, shell scripts, and monitoring checks.
+
+## Config Check
+
+`php run_sync.php --check-config` validates `ftp.json` and exits without creating archives, dumping MySQL databases, or syncing files.
+
+It checks:
+
+- backup `type` and `typebackup` values
+- required source folders for file backups
+- required archive `filename` for `time`, `increment`, and MySQL backups
+- destination config references and required FTP fields
+- MySQL config references and required MySQL fields
+- numeric `days`, `months`, and `full_backup_date`
+- `exclude` values with unsafe `..` path segments
+- log config basics
+
+Warnings are printed but still exit with code `0`. Errors exit with code `1`.
 
 ## Config Generator
 
@@ -169,7 +211,7 @@ Each item under `backup` describes one backup job.
 
 `typebackup` can be `file` or `mysql`. MySQL backups always use the `time` action internally.
 
-`exclude` is a space-separated list of paths to exclude from archive/sync operations.
+`exclude` is a space-separated list of folders to exclude from file backup archive/sync operations. Paths are relative to `src`; for example, `"exclude": "cache logs/tmp"` skips the `cache` and `logs/tmp` folders inside each source folder.
 
 `mysqlbase` is a space-separated list of database names. Use `+` to dump all available databases.
 
@@ -180,6 +222,49 @@ Each item under `backup` describes one backup job.
 `mysqlconfig` points to an item from the `mysql` section.
 
 `dst` points to an item from the `config` destination section.
+
+## File Folder Excludes
+
+Folder excludes work only for file backups (`"typebackup": "file"`). The value is a space-separated list of folder paths relative to each `src`.
+
+Example:
+
+```json
+{
+  "src": "/var/www/site",
+  "type": "increment",
+  "typebackup": "file",
+  "exclude": "cache logs/tmp var/session"
+}
+```
+
+This skips:
+
+```text
+/var/www/site/cache
+/var/www/site/logs/tmp
+/var/www/site/var/session
+```
+
+For `time` and `increment` backups, excluded folders are not added to the zip archive. For `now` backups, excluded folders are ignored during sync; if such folders already exist on the destination, they are left untouched instead of being deleted.
+
+## MySQL Database Excludes
+
+Use `mysqlbase_exclude` when `mysqlbase` is `+` and one or more databases should not be dumped.
+
+```json
+{
+  "type": "time",
+  "typebackup": "mysql",
+  "mysqlbase": "+",
+  "mysqlbase_exclude": "otrs test_db",
+  "mysqlconfig": "1"
+}
+```
+
+This dumps every database returned by MySQL except `otrs` and `test_db`.
+
+`mysqlbase_table_setup` is different: it does not skip databases. It only controls table dump settings inside databases that are already selected for backup.
 
 ## Destination Config
 

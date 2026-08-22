@@ -139,7 +139,7 @@
                     'type_backup' : 'Тип бекапа',
                     'typebackup_backup': 'Тип резервируемых данных',
                     'dst_backup' : 'Конфиг назначения',
-                    'exclude_backup': 'Исключение(пока не работает)',
+                    'exclude_backup': 'Исключить папки из файлового бекапа',
                     'now_backup' : 'Копирование файлов',
                     'time_backup' : 'Хранить N дней запакованные полные копии',
                     'increment_backup' : 'Инкрементный каждый день и полный раз в месяц, хранить N месяцев',
@@ -174,7 +174,6 @@
                             'time':{
                                 'months' : 1,
                                 'full_backup_date' : 1,
-                                'exclude' : 1,
                                 'typebackup': {
                                 }
                             },
@@ -182,7 +181,6 @@
                                 'months' : 1,
                                 'full_backup_date' : 1,
                                 'fileinc' : 1,
-                                'exclude' : 1,
                                 'days': 1,
                                 'mysqlbase': 1,
                                 'mysqlbase_exclude': 1,
@@ -197,7 +195,6 @@
                                 'mysqlbase_exclude': 1,
                                 'days': 1,
                                 'mysqlconfig': 1,
-                                'exclude' : 1,
                                 'typebackup': {
                                     'mysql' : 1
                                 }
@@ -212,6 +209,7 @@
                             },
                             'mysql': {
                                 'src': 1,
+                                'exclude' : 1,
                                 'full_backup_date' : 1,
                                 'type': {}
                             }

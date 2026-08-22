@@ -120,9 +120,9 @@ abstract class AbsAction
     * @param string $name
     * @param int $increment
     */
-    protected function archiveFiles($loc, $dst, $name, $increment = 0)
+    protected function archiveFiles($loc, $dst, $name, $increment = 0, array $exclude = [])
     {
-        ZipFolder::zip($this->local, $loc, $dst, $increment, $name);
+        ZipFolder::zip($this->local, $loc, $dst, $increment, $name, $exclude);
     }
     /**
     * put your comment there...
@@ -143,7 +143,7 @@ abstract class AbsAction
     }
     protected function increment($filename, $src, $local, $exclude,$type,$time)
     {
-        $this->archiveFiles($src, $local, $filename.'-'.$type, $time);
+        $this->archiveFiles($src, $local, $filename.'-'.$type, $time, $exclude);
     }
     /**
     * put your comment there...
@@ -184,6 +184,7 @@ abstract class AbsAction
             }
         } catch (\Exception $error) {
             MyLog::error('[DumpMySQL] ' . $error->getMessage(), [], 'main');
+            throw $error;
         }
     }
     protected function _checkNoDataTables($dumpSettingsDefault, $base,$setup){

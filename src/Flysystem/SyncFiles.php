@@ -3,10 +3,10 @@
 namespace Flysystem;
 
 use edrard\Log\MyLog;
+use Exc\SyncException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\PluginInterface;
-use League\Flysystem\FilesystemException;
 
 class SyncFiles implements PluginInterface
 {
@@ -62,6 +62,8 @@ class SyncFiles implements PluginInterface
             $this->contents = $this->local->listContents($this->src_path, $recursive);
             $this->dst = $this->filesystem->listContents($this->dst_path, $recursive);
             $this->pathMorf();
+            $this->contents = $this->filterExcluded($this->contents);
+            $this->dst = $this->filterExcluded($this->dst);
             MyLog::info("[Sync] Check if exist", [], 'main');
             foreach ($this->contents as $way) {
                 //Check if exist
@@ -80,11 +82,11 @@ class SyncFiles implements PluginInterface
             $this->createDirectory();
             MyLog::info("[Sync] Files copy process starting", [], 'main');
             $this->copyUpdateFiles();
+        } catch (SyncException $error) {
+            throw $error;
         } catch (\Exception $error) {
             MyLog::error('[SyncFiles] '.$error->getMessage(),[],'main');
-            if(!$error instanceof  FilesystemException ){
-                die($error->getMessage());
-            }
+            throw new SyncException($error->getMessage(), 'error');
         }
         $this->resset();
     }
@@ -112,6 +114,32 @@ class SyncFiles implements PluginInterface
         foreach ($this->contents as $key => $way) {
             $this->contents[$key]['path'] = preg_replace('#^'.trim($this->src_path, '/').'#iU', '', $way['path']);
         }
+    }
+    /**
+    * Remove excluded folders from sync comparison.
+    */
+    protected function filterExcluded(array $contents)
+    {
+        if ($this->exclude === []) {
+            return $contents;
+        }
+        return array_values(array_filter($contents, function ($item) {
+            return ! $this->isExcluded($item['path']);
+        }));
+    }
+    /**
+    * Check if a relative path is inside an excluded folder.
+    */
+    protected function isExcluded($path)
+    {
+        $path = trim($path, '/');
+        foreach ($this->exclude as $exclude) {
+            $exclude = trim($exclude, '/');
+            if ($exclude !== '' && ($path === $exclude || strpos($path, $exclude.'/') === 0)) {
+                return true;
+            }
+        }
+        return false;
     }
     /**
     * put your comment there...
@@ -150,8 +178,7 @@ class SyncFiles implements PluginInterface
         foreach ($this->dir_delete as $del) {
             $dir = '/'.trim($this->dst_path, '/').$del['path'];
             $response = $this->filesystem->deleteDir($dir);
-            $response ? MyLog::info("[Sync] Folder Deleted", [$dir], 'main')
-            : MyLog::error("[Sync] Can`t Delete Folder:", [$dir,$response], 'main');
+            $this->syncResponse($response, "[Sync] Folder Deleted", "[Sync] Can`t Delete Folder:", [$dir]);
         }
     }
     /**
@@ -163,8 +190,7 @@ class SyncFiles implements PluginInterface
         foreach ($this->file_delete as $del) {
             $file = '/'.trim($this->dst_path, '/').$del['path'];
             $response = $this->filesystem->delete($file);
-            $response ? MyLog::info("[Sync] File Deleted", [$file], 'main')
-            : MyLog::error("[Sync] Can`t Delete File:", [$file,$response], 'main');
+            $this->syncResponse($response, "[Sync] File Deleted", "[Sync] Can`t Delete File:", [$file]);
         }
     }
     /**
@@ -177,8 +203,7 @@ class SyncFiles implements PluginInterface
             $dir = '/'.trim($this->dst_path, '/').$creat_dir['path'].'/';
             //$dir = str_replace('.','rp_dot_',$dir);
             $response = $this->filesystem->createDir($dir);
-            $response ? MyLog::info("[Sync] Folder created", [$dir], 'main')
-            : MyLog::error("[Sync] Can`t create folder:", [$dir,$response], 'main');
+            $this->syncResponse($response, "[Sync] Folder created", "[Sync] Can`t create folder:", [$dir]);
         }
     }
     /**
@@ -192,10 +217,27 @@ class SyncFiles implements PluginInterface
             $file = '/'.trim($this->dst_path, '/').$file_create['path'];
             $local = '/'.trim($this->src_path, '/').$file_create['path'];
             $read = $this->local->readStream($local);
+            if ($read === false) {
+                throw new SyncException('Can not read local file: '.$local, 'error');
+            }
             $response = $this->filesystem->putStream($file, $read);
-            $response ? MyLog::info("[Sync] File update/created", [$file], 'main')
-            : MyLog::error("[Sync] Can`t create/update file:", [$file,$response], 'main');
+            if (is_resource($read)) {
+                fclose($read);
+            }
+            $this->syncResponse($response, "[Sync] File update/created", "[Sync] Can`t create/update file:", [$file]);
         }
+    }
+    /**
+    * Log sync operation result and fail the run when remote action failed.
+    */
+    protected function syncResponse($response, $success, $error, array $context)
+    {
+        if ($response) {
+            MyLog::info($success, $context, 'main');
+            return;
+        }
+        MyLog::error($error, array_merge($context, [$response]), 'main');
+        throw new SyncException($error.' '.implode(' ', $context), 'error');
     }
     /**
     * put your comment there...
