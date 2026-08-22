@@ -34,6 +34,8 @@ Run a backup manually:
 php run_sync.php
 ```
 
+Before starting a real backup, the runner validates `ftp.json`. Configuration errors stop the run with exit code `1`; warnings are printed but do not stop the backup.
+
 Check the configuration without running backup actions:
 
 ```bash
@@ -63,7 +65,7 @@ This is useful for cron, shell scripts, and monitoring checks.
 
 ## Config Check
 
-`php run_sync.php --check-config` validates `ftp.json` and exits without creating archives, dumping MySQL databases, or syncing files.
+`php run_sync.php --check-config` validates `ftp.json` and exits without creating archives, dumping MySQL databases, syncing files, or creating the lock file.
 
 It checks:
 

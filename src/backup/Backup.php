@@ -29,7 +29,7 @@ class Backup
     * put your comment there...
     *
     */
-    protected function initial()
+    protected function initializeActions()
     {
         $adapter = new Local('/', LOCK_SH, Local::SKIP_LINKS);
         $local = new Filesystem($adapter);
@@ -51,7 +51,7 @@ class Backup
     */
     public function run()
     {
-        $this->initial();
+        $this->initializeActions();
         $this->startBackup();
     }
     /**
