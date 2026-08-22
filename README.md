@@ -6,7 +6,7 @@ Linux Backup is a small PHP backup runner for Linux servers. It can sync files t
 
 ## Requirements
 
-- Linux server with PHP 7.0 or newer
+- Linux server with PHP 7.2.5 or newer
 - Composer
 - Git
 - PHP FTP functions enabled
@@ -40,6 +40,12 @@ Check the configuration without running backup actions:
 
 ```bash
 php run_sync.php --check-config
+```
+
+List parsed backup jobs without running backup actions:
+
+```bash
+php run_sync.php --list-jobs
 ```
 
 The repository also includes `backup_cron`. Copy or adapt its jobs into `/etc/cron.d/` when the configuration is ready.
@@ -79,6 +85,12 @@ It checks:
 - log config basics
 
 Warnings are printed but still exit with code `0`. Errors exit with code `1`.
+
+## Job List
+
+`php run_sync.php --list-jobs` prints the parsed jobs from `ftp.json` and exits without creating archives, dumping MySQL databases, syncing files, or creating the lock file.
+
+Use it after changing `ftp.json` to confirm `src`, `exclude`, `mysqlbase`, `mysqlbase_exclude`, `local`, and destination references are read as expected.
 
 ## Config Generator
 
@@ -250,6 +262,43 @@ This skips:
 
 For `time` and `increment` backups, excluded folders are not added to the zip archive. For `now` backups, excluded folders are ignored during sync; if such folders already exist on the destination, they are left untouched instead of being deleted.
 
+Typical file backup with folder excludes:
+
+```json
+{
+  "src": "/var/www/site",
+  "dstfolder": "/site/files",
+  "local": "base/files/",
+  "type": "time",
+  "days": "7",
+  "months": "0",
+  "filename": "site",
+  "fileinc": "d-m-Y",
+  "typebackup": "file",
+  "exclude": "cache logs/tmp var/session",
+  "dst": "1"
+}
+```
+
+Typical increment backup with a monthly full archive on the 7th day:
+
+```json
+{
+  "src": "/var/www/site",
+  "dstfolder": "/site/increment",
+  "local": "base/increment/",
+  "type": "increment",
+  "days": "0",
+  "months": "2",
+  "full_backup_date": "7",
+  "filename": "site",
+  "fileinc": "d-m-Y",
+  "typebackup": "file",
+  "exclude": "cache logs/tmp",
+  "dst": "1"
+}
+```
+
 ## MySQL Database Excludes
 
 Use `mysqlbase_exclude` when `mysqlbase` is `+` and one or more databases should not be dumped.
@@ -267,6 +316,35 @@ Use `mysqlbase_exclude` when `mysqlbase` is `+` and one or more databases should
 This dumps every database returned by MySQL except `otrs` and `test_db`.
 
 `mysqlbase_table_setup` is different: it does not skip databases. It only controls table dump settings inside databases that are already selected for backup.
+
+Typical MySQL backup that dumps all databases except `otrs`:
+
+```json
+{
+  "src": "",
+  "dstfolder": "/site/mysql",
+  "local": "base/mysql/",
+  "type": "time",
+  "days": "5",
+  "months": "0",
+  "filename": "mysql",
+  "fileinc": "d-m-Y",
+  "typebackup": "mysql",
+  "mysqlbase": "+",
+  "mysqlbase_exclude": "otrs",
+  "mysqlbase_table_setup": {},
+  "mysqlconfig": "1",
+  "dst": "1"
+}
+```
+
+## Smoke Tests
+
+Run the lightweight smoke tests after changing config parsing, validation, excludes, or CLI commands:
+
+```bash
+php tests/smoke.php
+```
 
 ## Destination Config
 

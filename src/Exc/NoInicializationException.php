@@ -2,6 +2,6 @@
 
 namespace Exc;
 
-class NoInicializationException extends Base
+class NoInicializationException extends NoInitializationException
 {
 }

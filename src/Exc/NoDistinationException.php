@@ -2,6 +2,6 @@
 
 namespace Exc;
 
-class NoDistinationException extends Base
+class NoDistinationException extends NoDestinationException
 {
 }

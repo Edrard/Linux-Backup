@@ -35,7 +35,7 @@ class Backup
         $local = new Filesystem($adapter);
         foreach ($this->config->returnActions() as $key => $elem) {
             $ctype = (strtolower($elem['typebackup']) !== 'mysql' ? ucfirst(strtolower($elem['type'])) : 'Time').ucfirst(strtolower($elem['typebackup']));
-            $dst = $this->distination($this->config->returnConfig($elem['dst']), $key, $elem['dst']);
+            $dst = $this->destination($this->config->returnConfig($elem['dst']), $key, $elem['dst']);
             $class = '\backup\Actions\\'.$ctype;
             if (! class_exists($class)) {
                 throw new NoInicializationException('No action class for element with key = '.$key.' and type = '.$ctype, 'error');
@@ -76,7 +76,7 @@ class Backup
     * @param string $key
     * @param int $id
     */
-    protected function distination(array $config, $key, $id)
+    protected function destination(array $config, $key, $id)
     {
         if ($config === []) {
             throw new NoDistinationException('No destination for element with key = '.$key, 'error');
@@ -92,6 +92,17 @@ class Backup
             $this->dst[$config['type']][$id] = $filesystem;
         }
         return $this->dst[$config['type']][$id];
+    }
+    /**
+    * Backward-compatible alias for the old misspelled method name.
+    *
+    * @param array $config
+    * @param string $key
+    * @param int $id
+    */
+    protected function distination(array $config, $key, $id)
+    {
+        return $this->destination($config, $key, $id);
     }
     /**
     * put your comment there...

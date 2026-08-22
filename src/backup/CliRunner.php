@@ -29,6 +29,10 @@ class CliRunner
         try {
             $config = new Config($this->configFile);
             $checkOnly = $this->hasArgument('--check-config');
+            if ($this->hasArgument('--list-jobs')) {
+                $this->listJobs($config);
+                return self::EXIT_SUCCESS;
+            }
             if (! $this->validateConfig($config)) {
                 return self::EXIT_CONFIG_ERROR;
             }
@@ -57,6 +61,36 @@ class CliRunner
     protected function hasArgument($name)
     {
         return in_array($name, $this->arguments, true);
+    }
+
+    protected function listJobs(Config $config)
+    {
+        $this->writeLine('Backup jobs:');
+        foreach ($config->returnActions() as $key => $job) {
+            $backupType = strtolower($job['typebackup']);
+            $runType = strtolower($job['type']);
+            $this->writeLine('['.$key.'] '.$backupType.'/'.$runType.' -> dst '.$job['dst'].' '.$job['dstfolder']);
+            if ($backupType === 'mysql') {
+                $this->writeLine('    mysqlbase: '.$this->listValue($job['mysqlbase']));
+                if ($job['mysqlbase_exclude'] !== []) {
+                    $this->writeLine('    mysqlbase_exclude: '.$this->listValue($job['mysqlbase_exclude']));
+                }
+            } else {
+                $this->writeLine('    src: '.$this->listValue($job['src']));
+                if ($job['exclude'] !== []) {
+                    $this->writeLine('    exclude: '.$this->listValue($job['exclude']));
+                }
+            }
+            $this->writeLine('    local: '.$job['local']);
+        }
+    }
+
+    protected function listValue($value)
+    {
+        if (is_array($value)) {
+            return $value === [] ? '-' : implode(', ', $value);
+        }
+        return trim((string) $value) === '' ? '-' : (string) $value;
     }
 
     protected function validateConfig(Config $config)
